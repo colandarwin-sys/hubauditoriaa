@@ -1,0 +1,10 @@
+{
+  "name": "portal-distribucion-auditoria-netlify",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {"node": ">=20"},
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "pg": "^8.13.1"
+  }
+}

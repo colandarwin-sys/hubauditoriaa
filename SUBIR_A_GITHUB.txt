@@ -1,0 +1,16 @@
+QUÉ ARRASTRAR A LA PANTALLA DE GITHUB
+=====================================
+
+Descomprime el ZIP y entra a la carpeta PORTAL_DISTRIBUCION_AUDITORIA_NETLIFY_v01.
+Arrastra a GitHub TODO lo que encuentres dentro de esa carpeta.
+
+Debes ver en la raíz del repositorio:
+- netlify.toml
+- package.json
+- supabase_setup.sql
+- README_PUBLICACION.txt
+- SUBIR_A_GITHUB.txt
+- static/
+- netlify/
+
+NO arrastres el ZIP.

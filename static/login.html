@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ingreso · Distribución Auditoría</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="loginpage loginpage-v12">
+  <div class="login-backdrop" aria-hidden="true"></div>
+  <div class="login-shade" aria-hidden="true"></div>
+
+  <main class="login-shell">
+    <section class="loginbox loginbox-v12" aria-label="Inicio de sesión">
+      <div class="login-copy login-copy-v12">
+        <h1>Iniciar sesión</h1>
+        <p>Accede al portal de distribución de auditoría médica</p>
+      </div>
+
+      <form id="loginForm" class="login-form-v12" autocomplete="on">
+        <div class="login-input-wrap ">
+          <span class="login-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7 8a7 7 0 0 0-14 0"/></svg>
+          </span>
+          <input id="username" name="username" autocomplete="username" placeholder="Usuario" aria-label="Usuario" required>
+        </div>
+
+        <div class="login-input-wrap ">
+          <span class="login-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M7 10V8a5 5 0 0 1 10 0v2M6 10h12v10H6z"/></svg>
+          </span>
+          <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Contraseña" aria-label="Contraseña" required>
+          <button class="password-eye" type="button" id="togglePassword" aria-label="Mostrar u ocultar contraseña">
+            <svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg>
+          </button>
+        </div>
+
+        <div class="login-options">
+          <label class="remember-line"><input type="checkbox" id="rememberUser"> <span>Recordarme</span></label>
+          <span class="secure-note">¿Olvidaste tu contraseña?</span>
+        </div>
+
+        <button class="login-submit" type="submit"><span>Ingresar</span><span class="login-arrow" aria-hidden="true">→</span></button>
+        <div id="error" class="login-error hidden" role="alert"></div>
+      </form>
+    </section>
+  </main>
+
+  <script src="/js/shared.js"></script>
+  <script>
+    const userInput = document.getElementById('username');
+    const passInput = document.getElementById('password');
+    const remember = document.getElementById('rememberUser');
+    const rememberedUser = localStorage.getItem('auditoria_remember_user');
+    if (rememberedUser) { userInput.value = rememberedUser; remember.checked = true; }
+    document.getElementById('togglePassword').onclick = () => {
+      const visible = passInput.type === 'text';
+      passInput.type = visible ? 'password' : 'text';
+      document.getElementById('togglePassword').classList.toggle('active', !visible);
+    };
+    document.getElementById('loginForm').onsubmit = async e => {
+      e.preventDefault();
+      const errorBox = document.getElementById('error');
+      errorBox.classList.add('hidden');
+      try {
+        const r = await api('/api/login', {method:'POST',body:JSON.stringify({username:userInput.value.trim(),password:passInput.value})});
+        if (remember.checked) localStorage.setItem('auditoria_remember_user', userInput.value.trim());
+        else localStorage.removeItem('auditoria_remember_user');
+        if (r.ok) location.href='/inicio.html';
+      } catch(err) {
+        errorBox.textContent = err.message || 'No se pudo iniciar sesión.';
+        errorBox.classList.remove('hidden');
+      }
+    };
+  </script>
+</body>
+</html>
