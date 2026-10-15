@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Expedientes Pendientes · Auditoría Médica</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=27" />
+<link rel="stylesheet" href="/css/unified.css"><style>html,body{background:#f0ffe3!important}body{margin:0}</style></head>
+<body class="aud-expedientes aud-booting">
+  <div class="auth-gate" id="authGate">
+    <div class="auth-panel">
+      <div class="auth-mark">EP</div>
+      <div class="auth-eyebrow">AUDITORÍA MÉDICA</div>
+      <h1>Expedientes pendientes</h1>
+      <p>Ingresa con tu usuario autorizado para acceder al panel.</p>
+      <form id="loginForm" class="auth-form">
+        <label>Usuario<input id="loginUser" autocomplete="username" placeholder="dcolan" /></label>
+        <div class="auth-error hidden" id="loginError">Usuario no autorizado.</div>
+        <button class="auth-submit" type="submit">Ingresar</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark"><span>EP</span></div>
+        <div class="brand-copy"><span class="brand-eyebrow">AUDITORÍA MÉDICA</span><strong>Expedientes</strong><span class="brand-sub">Panel de pendientes</span></div>
+      </div>
+      <nav class="nav-list" id="navList">
+        <button class="nav-item active" data-view="inicio"><span class="nav-icon">✦</span><span>Inicio</span></button>
+        <button class="nav-item" data-view="resumen"><span class="nav-icon">⌂</span><span>Resumen</span></button>
+        <button class="nav-item" data-view="evolucion"><span class="nav-icon">↗</span><span>Evolución</span></button>
+        <button class="nav-item" data-view="antiguedad"><span class="nav-icon">◷</span><span>Antigüedad</span></button>
+        <button class="nav-item" data-view="auditores"><span class="nav-icon">◎</span><span>Por auditor</span></button>
+        <button class="nav-item" data-view="expedientes"><span class="nav-icon">≣</span><span>Expedientes</span></button>
+        <button class="nav-item" data-view="historico"><span class="nav-icon">▣</span><span>Histórico de cargas</span></button>
+      </nav>
+      <div class="sidebar-note designer-credit">
+        <div class="analysis-dot">✦</div>
+        <div><strong>Herramienta diseñada por:</strong><span>Darwen Colan</span></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="title-wrap">
+          <button id="menuBtn" class="icon-btn menu-btn">☰</button>
+          <div>
+            <div class="top-eyebrow">AUDITORÍA MÉDICA · CONTROL DE EXPEDIENTES</div>
+            <h1 id="pageTitle">Resumen ejecutivo</h1>
+            <p>Una lectura integrada del backlog, su evolución y la gestión por auditor.</p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <div class="user-chip" id="userChip"><span class="user-dot"></span><div><small>Usuario</small><strong id="currentUserLabel">—</strong></div><button id="logoutBtn" title="Cerrar sesión">Salir</button></div>
+          <button class="btn secondary hidden-control" id="pdfSummaryBtn">Exportar resumen PDF</button>
+          <button class="btn secondary" id="exportBtn"><span aria-hidden="true">↓</span> Descargar Excel</button>
+          <button class="btn danger" id="deleteCutBtn" disabled>Eliminar corte actual</button>
+          <button class="btn primary" id="uploadBtn">＋ Cargar nuevo corte</button>
+        </div>
+      </header>
+
+      <section class="filterbar">
+        <label>Fecha de corte<select id="dateFilter"></select></label>
+        <label>Comparar con<select id="compareFilter"></select></label>
+        <label>Médico auditor<select id="auditorFilter"><option value="ALL">Todos</option></select></label>
+        <label>Tipo<select id="typeFilter"><option value="ALL">Todos</option></select></label>
+        <label id="ageLabel" class="hidden-control">Antigüedad<select id="ageFilter"><option value="ALL">Todas las antigüedades</option><option value="0–15 días">0–15 días</option><option value="16–30 días">16–30 días</option><option value="31–60 días">31–60 días</option><option value="61–90 días">61–90 días</option><option value="&gt;90 días">Más de 90 días</option><option value="Sin fecha">Sin fecha</option></select></label>
+        <label class="search-label" id="searchLabel">Buscar<input id="searchFilter" type="search" placeholder="Cuenta, paciente, IAFA…" /></label>
+        <button id="clearFilters" class="link-btn">Limpiar filtros</button>
+      </section>
+
+      <section id="viewRoot" class="view-root"></section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop hidden" id="uploadModal">
+    <div class="modal">
+      <div class="modal-head">
+        <div><h2>Cargar nuevo corte</h2><p>El sistema reconocerá las hojas DCL, AMB, HOS y PAQ.</p></div>
+        <button class="icon-btn" id="closeModal">×</button>
+      </div>
+      <div class="upload-zone" id="dropZone">
+        <div class="upload-icon">⇧</div>
+        <strong>Arrastra tu Excel aquí</strong>
+        <span>o selecciónalo desde tu equipo</span>
+        <input type="file" id="fileInput" accept=".xlsx,.xls" />
+        <button class="btn secondary" id="chooseFile">Seleccionar Excel</button>
+      </div>
+      <div class="upload-preview hidden" id="uploadPreview"></div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="cancelUpload">Cancelar</button>
+        <button class="btn primary" id="processUpload" disabled>Procesar corte</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="data/seed.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="/js/jszip.min.js"></script>
+<script src="/js/excel_tables.js?v=29"></script>
+<script src="/js/download_feedback.js?v=31"></script>
+<script src="app.js?v=31"></script>
+<script src="/js/unified.js"></script><script src="/js/expedientes_bridge.js"></script></body>
+</html>

@@ -1,0 +1,334 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+:root{--aud-lime:#cdff00;--aud-black:#0e160f;--aud-side:251px}
+body{font-family:Manrope,Arial,sans-serif!important;background:#f6f7f3!important}
+.aud-menu{position:fixed;inset:0 auto 0 0;width:var(--aud-side);box-sizing:border-box;background:var(--aud-lime);z-index:1200;color:#101810;display:flex;flex-direction:column;padding:0 8px 12px;overflow:auto;box-shadow:1px 0 0 #7fbd19;font-family:Manrope,sans-serif}
+.aud-menu *{box-sizing:border-box}.aud-brand{display:flex;align-items:center;gap:10px;padding:20px 3px;border-bottom:1px solid #7ed118;margin-bottom:20px}.aud-logo{background:#0b150d;color:var(--aud-lime);width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:17px;font-weight:800}.aud-brand small{font-size:9px;letter-spacing:1px;font-weight:800;display:block}.aud-brand strong{display:block;font-size:14px;letter-spacing:-.5px}.aud-brand span{font-size:10px;display:block}.aud-navtitle{padding:5px 8px 14px;font-size:10px;font-weight:800;letter-spacing:1.3px;color:#496322}.aud-global,.aud-group-btn{width:100%;border:0;display:block;text-align:left;text-decoration:none;color:#101710;font:700 12px Manrope,sans-serif;background:transparent;padding:14px 12px;border-radius:11px;cursor:pointer}.aud-global:hover,.aud-group-btn:hover{background:#d0ff81}.aud-group-btn{display:flex;justify-content:space-between;align-items:center}.aud-group.open>.aud-group-btn{background:#101710;color:var(--aud-lime)}.aud-sub{display:none;margin:4px 2px 8px 16px;border-left:1px solid #76bb21;padding-left:8px}.aud-group.open .aud-sub{display:block}.aud-sub>a{font-size:11px;display:block;padding:11px 10px;border-radius:8px;color:#203019;text-decoration:none}.aud-sub>a:hover,.aud-sub>a.selected{background:#dfffab;color:#101710;font-weight:800}.aud-footer{border-top:1px solid #80c72d;margin-top:auto;padding:15px 10px 4px;font-size:10px;display:grid;gap:4px}.aud-footer b{font-size:9px}.aud-footer button{border:1px solid #213c1d;border-radius:8px;padding:7px;background:transparent;font:700 10px Manrope;cursor:pointer;margin-top:7px}
+body.aud-expedientes .app-shell{margin-left:var(--aud-side)!important}body.aud-expedientes #sidebar{display:none!important}body.aud-expedientes #authGate{display:none!important}body.aud-expedientes #logoutBtn{display:none!important}
+body.aud-tarifarios .shell{margin-left:var(--aud-side)!important;display:block!important}body.aud-tarifarios .shell>.sidebar{display:none!important}body.aud-tarifarios .shell>.main{margin:0!important;width:100%!important;max-width:none!important}body.aud-tarifarios .login{display:none!important}
+body.aud-distribucion .layout{margin-left:var(--aud-side)!important;display:block!important}body.aud-distribucion .layout>.sidebar{display:none!important}body.aud-distribucion .layout>.main{margin-left:0!important;width:auto!important;max-width:none!important}
+@media(max-width:760px){:root{--aud-side:184px}.aud-brand strong{font-size:12px}.aud-menu{padding:0 5px 10px}}
+body.aud-expedientes .app-shell{margin-left:0!important}body.aud-expedientes .main,body.aud-expedientes.home-mode .main{margin-left:var(--aud-side)!important;width:calc(100% - var(--aud-side))!important}body.aud-tarifarios .main{padding-left:28px!important;padding-right:28px!important}body.aud-distribucion .main{max-width:none!important}
+
+/* Shared visual system: original operational layouts remain intact. */
+body.aud-tarifarios{--yellow:#cdff00;--yellow-soft:#e7ffbd;--bg:#f5f6f1;--panel2:#f8fcf3;--ink:#111911;--line:#dce6d3;background:#f6f7f3!important}
+body.aud-tarifarios h1,body.aud-tarifarios h2,body.aud-tarifarios h3,body.aud-tarifarios button,body.aud-tarifarios .kpi-value,body.aud-tarifarios .stat strong{font-family:Manrope,Arial,sans-serif!important}
+body.aud-tarifarios .main{background:#f6f7f3!important}body.aud-tarifarios .primary{background:#111911!important;border-color:#111911!important;color:#cdff00!important}
+body.aud-distribucion{--nav:#111911;--nav2:#153019;--blue:#4d9f28;--cyan:#cdff00;--bg:#f6f7f3;--line:#dce6d3;--ink:#101810;--muted:#61705a;--good:#2c8944;background:#f6f7f3!important}
+body.aud-distribucion h1,body.aud-distribucion h2,body.aud-distribucion h3,body.aud-distribucion h4,body.aud-distribucion .btn{font-family:Manrope,Arial,sans-serif!important}
+body.aud-distribucion .hero{background:linear-gradient(125deg,#0d1c11,#173a20)!important}
+body.aud-distribucion .btn.primary{background:#101810!important;color:#cdff00!important}
+body.aud-distribucion .card{border-color:#dce6d3!important}
+body.aud-expedientes #menuBtn{display:none!important}
+
+/* V6 -- unificacion: tipografia y elementos compartidos sin sustituir la logica original */
+body,body button,body input,body select,body textarea,body table,body .btn,body .kpi,body .topbar,body .card{font-family:Manrope,Arial,sans-serif!important}
+body.aud-expedientes #userChip,body.aud-expedientes .user-chip{display:none!important}
+body.aud-expedientes .nav-item[data-view="inicio"]{display:none!important}
+body.aud-distribucion .layout>.main{min-width:0!important;box-sizing:border-box!important;overflow-x:hidden!important;padding:24px clamp(16px,2.1vw,38px)!important}
+body.aud-distribucion .layout{min-width:0!important;width:auto!important;max-width:none!important;box-sizing:border-box!important}
+body.aud-distribucion .grid2,body.aud-distribucion .grid3,body.aud-distribucion .row,body.aud-distribucion .card,body.aud-distribucion .topbar{min-width:0;max-width:100%;box-sizing:border-box}
+body.aud-distribucion .card{overflow-wrap:anywhere}
+body.aud-distribucion .topbar{border-bottom:1px solid #d5e6cc;padding-bottom:20px;margin-bottom:18px}
+body.aud-distribucion .eyebrow{color:#347a23!important}
+body.aud-distribucion .btn,body.aud-distribucion button{transition:transform .2s,box-shadow .2s}body.aud-distribucion .btn:hover{transform:translateY(-1px)}
+body.aud-tarifarios{--bg:#f6f7f3;--bg2:#eff5e8;--panel:#fff;--panel2:#f9fdf5;--panel3:#eaf7df;--ink:#111a11;--muted:#627361;--line:#d6e4d2;--blue:#20482a;--blue2:#377b2e;--nav:#101910;--nav2:#153019;--soft:#f0fae7;--gold:#cdff00;--gold2:#70ce3e;--maroon:#245b30;--yellow:#cdff00;--yellow-soft:#e9ffc8;--shadow:0 14px 36px rgba(15,50,18,.09)}
+body.aud-tarifarios .topbar,body.aud-tarifarios .hero,body.aud-tarifarios .page-hero,body.aud-tarifarios .header,body.aud-tarifarios .banner{border-color:#285c2c}
+body.aud-tarifarios .stat,body.aud-tarifarios .card,body.aud-tarifarios .panel{border-color:#d6e4d2}
+body.aud-tarifarios h1,body.aud-tarifarios h2,body.aud-tarifarios h3,body.aud-tarifarios h4,body.aud-tarifarios .topbar h2{font-family:Manrope,Arial,sans-serif!important}
+body.aud-tarifarios canvas{max-width:100%}
+body.aud-tarifarios .versionBadge{background:#cdff00!important;color:#101910!important}
+body.aud-tarifarios .main{min-width:0;overflow-x:auto!important}
+body.aud-distribucion .card.hero,body.aud-distribucion .hero{background:linear-gradient(125deg,#0a0e0a,#112b18)!important;color:#fff!important}
+body.aud-distribucion .hero .eyebrow{color:#cdff00!important}
+body.aud-distribucion .btn.primary{border-color:#101810!important}
+.aud-menu .aud-admin-link{margin-top:5px;border-top:1px solid #8ada3f;border-radius:0;padding-top:17px}
+/* Authentically lime-and-black login, not the blue Distribution theme */
+body.loginpage-v12{font-family:Manrope,Arial,sans-serif!important;background:#080e09!important}
+body.loginpage-v12 .login-shade{background:linear-gradient(110deg,rgba(3,9,4,.88),rgba(11,28,12,.68))!important}
+body.loginpage-v12 .loginbox-v12{background:linear-gradient(145deg,#0b150c,#17311b)!important;border:1px solid #508525!important;box-shadow:0 25px 90px #030803ae,0 0 85px #cdff0012!important}
+body.loginpage-v12 .loginbox-v12 h1{font-family:Manrope,Arial,sans-serif!important;color:#f9fff3!important}
+body.loginpage-v12 .loginbox-v12 p,body.loginpage-v12 .login-options{color:#c7d9bf!important}
+body.loginpage-v12 .login-input-wrap{background:#0b1c10!important;border:1px solid #43673b!important;color:#eaffdc!important}
+body.loginpage-v12 .login-input-wrap input{background:transparent!important;color:#fff!important}
+body.loginpage-v12 .login-icon svg,body.loginpage-v12 .password-eye svg{stroke:#b6f97a!important}
+body.loginpage-v12 .login-submit{background:#cdff00!important;color:#111911!important;border:0!important;box-shadow:0 15px 38px #cdff0033!important}
+body.loginpage-v12 .login-submit:hover{background:#c8ff73!important;transform:translateY(-2px)}
+body.loginpage-v12 .secure-note{color:#cdff00!important}
+@media(max-width:1100px){body.aud-distribucion .grid2,body.aud-distribucion .grid3{grid-template-columns:1fr!important}}
+
+/* Encabezados de seccion: contraste negro/lima */
+body.aud-distribucion .topbar{background:linear-gradient(110deg,#0a110c,#16301c)!important;color:#f5fff1!important;padding:19px 24px!important;border-radius:15px!important;border:1px solid #294731!important}
+body.aud-distribucion .topbar h1{color:#fff!important}body.aud-distribucion .topbar p{color:#cbdac5!important}body.aud-distribucion .topbar .eyebrow{color:#cdff00!important}
+body.aud-tarifarios .topbar{background:linear-gradient(110deg,#0a110c,#18341d)!important;color:#f3fff2!important;border-radius:15px!important;padding:20px!important;margin-bottom:14px!important}
+body.aud-tarifarios .topbar h2,body.aud-tarifarios .topbar h1{color:#fff!important}body.aud-tarifarios .topbar p,body.aud-tarifarios .topbar .overline{color:#b8f182!important}
+
+
+/* V7 fixes */
+
+.aud-users-link{margin-top:10px;padding-top:16px;border-top:1px solid #85d73f;border-radius:0}
+body.aud-expedientes .nav-item[data-view="inicio"]{display:none!important}
+body.aud-expedientes.home-mode .main{margin-left:var(--aud-side)!important;width:calc(100% - var(--aud-side))!important}
+body.aud-tarifarios{--gold:#cdff00!important;--gold2:#d2ff88!important;--yellow:#cdff00!important;--yellow-soft:#efffd3!important;--bg:#f6f7f3!important;--bg2:#edf4e8!important;--panel:#fff!important;--panel2:#f8fcf5!important;--panel3:#e8f4df!important;--ink:#111911!important;--muted:#627361!important;--line:#d7e4d1!important;--blue:#111911!important;--blue2:#214b29!important;--nav:#111911!important;--nav2:#153019!important;--soft:#eff6ea!important;--maroon:#214b29!important}
+body.aud-tarifarios .sidebar{background:linear-gradient(180deg,#111911,#17321d 70%,#112516)!important;border-right-color:#26412c!important}
+body.aud-tarifarios .brand-logo{background:linear-gradient(135deg,#111911,#214b29)!important;color:#cdff00!important}
+body.aud-tarifarios .nav button:hover,body.aud-tarifarios .nav button.active{background:linear-gradient(90deg,rgba(205,255,0,.2),rgba(205,255,0,.12))!important;border-color:rgba(205,255,0,.28)!important;color:#fff!important}
+body.aud-tarifarios .nav button.active svg,body.aud-tarifarios .nav button svg{color:#cdff00!important}
+body.aud-tarifarios .topbar,body.aud-tarifarios .hero-card{background:linear-gradient(120deg,#09120a,#16321d)!important;color:#f6fff2!important;border-color:#27452d!important}
+body.aud-tarifarios .topbar p,body.aud-tarifarios .hero-card p,body.aud-tarifarios .overline{color:#c7dec1!important}
+body.aud-tarifarios .ghost,body.aud-tarifarios .soft,body.aud-tarifarios .icon-btn{border-color:#d7e4d1!important;color:#132013!important;background:#fff!important}
+body.aud-tarifarios .ghost:hover,body.aud-tarifarios .soft:hover,body.aud-tarifarios .icon-btn:hover{background:#f0ffd6!important;border-color:#cdff00!important}
+body.aud-tarifarios .pill,body.aud-tarifarios .tag,body.aud-tarifarios .versionBadge{background:#efffd0!important;color:#32572a!important;border-color:#d8f1b1!important}
+body.aud-tarifarios .fill{background:linear-gradient(90deg,#111911 0%,#cdff00 100%)!important;box-shadow:0 0 10px rgba(205,255,0,.18)!important}
+body.aud-tarifarios .insight-card{background:#111911!important;color:#fff!important}body.aud-tarifarios .insight-card p{color:#d7e6d1!important}body.aud-tarifarios .insight-title{color:#cdff00!important}
+body.aud-distribucion .sidebar{background:linear-gradient(180deg,#111911,#17311c 55%,#153019)!important}body.aud-distribucion .brandmark{background:linear-gradient(135deg,#111911,#214b29)!important;color:#cdff00!important}
+
+
+/* V8 · correcciones de navegación y estandarización visual */
+body.aud-home{background:#f6f7f3!important}
+body.aud-distribucion{--nav:#101810!important;--nav2:#153019!important;--blue:#214b29!important;--cyan:#cdff00!important;--bg:#f6f7f3!important;--line:#d7e4d1!important;--ink:#101810!important;--muted:#647260!important}
+body.aud-distribucion .topbar,
+body.aud-distribucion .card.hero,
+body.aud-distribucion .hero,
+body.aud-distribucion .hero-users{background:linear-gradient(110deg,#050905 0%,#09120a 36%,#153019 100%)!important;color:#f7fff3!important;border:1px solid #294731!important;box-shadow:0 18px 44px rgba(18,42,22,.10)!important}
+body.aud-distribucion .topbar,body.aud-tarifarios .topbar{border-radius:20px!important}
+body.aud-distribucion .topbar p,body.aud-distribucion .hero p,body.aud-distribucion .hero-users p{color:#d4e4ce!important}
+body.aud-distribucion .topbar .eyebrow,body.aud-distribucion .hero .eyebrow,body.aud-distribucion .hero-users .eyebrow{color:#cdff00!important}
+body.aud-distribucion .hero:after,body.aud-distribucion .equity-panel:after,body.aud-distribucion .hero-users:after,body.aud-tarifarios .kpi:after,body.aud-tarifarios .hero-card:after,body.aud-tarifarios .hero-card:before,body.aud-home .hero-main:before,body.aud-home .hero-main:after{display:none!important}
+body.aud-distribucion .btn,body.aud-distribucion button.btn{border-color:#d2e2cb!important;color:#214b29!important;background:#fff!important}
+body.aud-distribucion .btn:hover{background:#f2ffe1!important;border-color:#cdff00!important}
+body.aud-distribucion .btn.primary{background:#111911!important;border-color:#111911!important;color:#cdff00!important;box-shadow:0 10px 24px rgba(17,25,17,.16)!important}
+body.aud-distribucion .btn.dark{background:#153019!important;border-color:#153019!important;color:#f5fff1!important}
+body.aud-distribucion .filebox{border-color:#c8dec0!important;background:#fbfef8!important;color:#214b29!important}
+body.aud-distribucion .status{background:#eff9e8!important;border-color:#d7ead0!important;color:#2e6b2c!important}
+body.aud-distribucion .status.warn{background:#fff7e8!important;border-color:#eedcaf!important;color:#95640e!important}
+body.aud-distribucion .empty{border-color:#d6e4d1!important;background:#fbfef8!important;color:#5e6c59!important}
+body.aud-distribucion details.panel,body.aud-distribucion .person,body.aud-distribucion .mitem,body.aud-distribucion .overview-card,body.aud-distribucion .result-person-card,body.aud-distribucion .result-person-detail,body.aud-distribucion .rpc-stats>div{border-color:#d7e4d1!important;background:#fff!important}
+body.aud-distribucion .badge{background:#eef7e8!important;color:#2e6b2c!important}
+body.aud-distribucion .badge.nursing{background:#eef7e8!important;color:#2e6b2c!important}
+body.aud-distribucion .loadbar,body.aud-distribucion .eq-track{background:#ecf3e7!important}
+body.aud-distribucion .loadbar i,body.aud-distribucion .eq-track i{background:linear-gradient(90deg,#153019,#cdff00)!important}
+body.aud-distribucion .field input:focus,body.aud-distribucion .field select:focus{border-color:#7fb84e!important;box-shadow:0 0 0 4px rgba(205,255,0,.12)!important}
+body.aud-distribucion .result-load.low{background:#eef7e8!important;color:#2e6b2c!important;border-color:#d6e8d0!important}
+body.aud-distribucion .rpd-chevron{color:#4d6b42!important}
+body.aud-tarifarios .topbar,body.aud-tarifarios .hero-card,body.aud-tarifarios .insight-card{background:linear-gradient(110deg,#050905 0%,#09120a 36%,#153019 100%)!important;color:#f6fff2!important;border-color:#294731!important}
+body.aud-tarifarios .topbar p,body.aud-tarifarios .hero-card p,body.aud-tarifarios .insight-card p,body.aud-tarifarios .overline{color:#d4e4ce!important}
+body.aud-tarifarios .kpi:after,body.aud-tarifarios .topbar:before,body.aud-tarifarios .topbar:after,body.aud-tarifarios .hero-card:before,body.aud-tarifarios .hero-card:after,body.aud-tarifarios .insight-card:before,body.aud-tarifarios .insight-card:after{display:none!important}
+body.aud-home .home-stage{background:#f4f7f1!important}
+body.aud-home .hero-main{background:linear-gradient(110deg,#050905 0%,#09120a 36%,#153019 100%)!important;border:1px solid #294731!important;box-shadow:0 24px 56px rgba(18,42,22,.12)!important}
+
+/* V9: shared edge-to-edge masthead, directly adjoining the lime navigation */
+body.aud-distribucion .layout,body.aud-tarifarios .shell{background:#f0ffe3!important}
+body.aud-distribucion .layout>.main,body.aud-tarifarios .shell>.main{padding:0 0 32px!important;margin:0!important;background:#f0ffe3!important;overflow:visible!important}
+body.aud-distribucion .layout{margin-left:var(--aud-side)!important}
+body.aud-tarifarios .shell{margin-left:var(--aud-side)!important}
+body.aud-distribucion .topbar,body.aud-tarifarios .topbar{margin:0 0 22px!important;padding:29px 34px 31px!important;width:100%!important;max-width:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:linear-gradient(108deg,#050607 0%,#07110a 55%,#153019 100%)!important}
+body.aud-distribucion .layout>.main> :not(.topbar),body.aud-tarifarios .shell>.main> :not(.topbar){margin-left:32px!important;margin-right:32px!important}
+body.aud-distribucion .layout>.main>.grid2,body.aud-distribucion .layout>.main>.grid3,body.aud-tarifarios .shell>.main>.hero-grid{width:calc(100% - 64px)!important}
+body.aud-distribucion .layout>.main>.topbar .eyebrow,body.aud-tarifarios .shell>.main>.topbar .overline{color:#cdff00!important}
+body.aud-distribucion .layout>.main>.topbar h1,body.aud-tarifarios .shell>.main>.topbar h2{color:#fff!important}
+body.aud-distribucion .layout>.main>.topbar p,body.aud-tarifarios .shell>.main>.topbar p{color:#d4e4ce!important}
+body.aud-home .home-stage{margin-left:var(--aud-side)!important;padding:0 0 34px!important;background:#f0ffe3!important}
+body.aud-home .home-topline{margin:0!important;padding:18px 34px 0!important;background:#050607!important;color:#cdff00!important}
+body.aud-home .home-topline span{color:#cce2bd!important}
+body.aud-home .hero-main{border:0!important;border-radius:0!important;box-shadow:none!important;margin:0!important;background:linear-gradient(108deg,#050607 0%,#07110a 55%,#153019 100%)!important}
+body.aud-home .hirow,body.aud-home .mod-grid{margin-left:32px!important;margin-right:32px!important}
+body.aud-expedientes.aud-booting .main{visibility:hidden!important}
+body.aud-expedientes.aud-booting{background:#050607!important}
+body.aud-expedientes.aud-booting .auth-gate{display:none!important}
+body.aud-distribucion .filebox,body.aud-distribucion .status,body.aud-distribucion .btn{color:#153019!important;border-color:#c6e9a8!important}
+body.aud-distribucion .filebox{background:#f3ffe5!important}
+body.aud-distribucion .status{background:#edfbdc!important}
+body.aud-distribucion .equity-panel,body.aud-distribucion .card.hero{background:linear-gradient(110deg,#050607,#153019)!important}
+body.aud-distribucion .equity-panel:after,body.aud-distribucion .hero:after{display:none!important}
+body.aud-distribucion .equity-panel small,body.aud-distribucion .equity-panel span{color:#d6eacb!important}
+body.aud-distribucion .eq-track i,body.aud-distribucion .loadbar i{background:linear-gradient(90deg,#153019,#cdff00)!important}
+
+/* V11: autor y avatar integrados en la navegacion */
+.aud-author{display:flex;align-items:center;gap:9px;padding:9px 0 11px;min-width:0}
+.aud-photo-picker{position:relative;flex:0 0 46px;cursor:pointer}
+.aud-avatar{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:#111a0f;color:#cdff00;border:2px solid #111a0f;background-size:cover;background-position:center;font-size:20px}
+.aud-edit-avatar{position:absolute;right:-1px;bottom:-1px;display:grid;place-items:center;width:18px;height:18px;background:#0c1308;color:#cdff00;border-radius:50%;font-size:12px}
+.aud-author-text{min-width:0;display:flex;flex-direction:column;gap:3px}.aud-author-text small{font-size:8px;line-height:1.3;letter-spacing:.5px;font-weight:800;color:#1b2912}
+.aud-author-text strong{font-size:11px;line-height:1.3;letter-spacing:-.2px}.aud-photo-btn{border:0!important;background:transparent!important;text-decoration:underline;text-align:left!important;font:700 10px Manrope,sans-serif!important;padding:0!important;margin:0!important;cursor:pointer;color:#1d3414}
+.aud-footer #aud-username{font-size:9px;opacity:.7}
+
+
+/* V12.1 · ajustes solicitados por usuaria */
+body.aud-tarifarios,
+body.aud-distribucion,
+body.aud-tarifarios button,body.aud-tarifarios input,body.aud-tarifarios select,
+body.aud-distribucion button,body.aud-distribucion input,body.aud-distribucion select,
+body.aud-tarifarios h1,body.aud-tarifarios h2,body.aud-tarifarios h3,body.aud-tarifarios h4,
+body.aud-distribucion h1,body.aud-distribucion h2,body.aud-distribucion h3,body.aud-distribucion h4{
+  font-family:Manrope,Arial,sans-serif!important;
+}
+
+/* Pie de navegación */
+.aud-footer{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding-bottom:10px}
+.aud-author{flex-direction:column;align-items:center;justify-content:center;gap:8px;width:100%}
+.aud-author-text{align-items:center;text-align:center;gap:2px}
+.aud-author-text small{font-size:8px;letter-spacing:.09em;color:#334124}
+.aud-author-text strong{font-size:14px;letter-spacing:-.02em;color:#111911}
+.aud-photo-btn{text-align:center!important;font-size:10px!important}
+.aud-footer #aud-username{font-size:12px;font-weight:700;opacity:.82;text-align:center}
+.aud-footer button#aud-logout{width:100%;max-width:176px}
+
+/* Gestión de tarifarios: sin glow amarillo ni saltos */
+body.aud-tarifarios .kpis,body.aud-tarifarios .stats{gap:14px!important}
+body.aud-tarifarios .kpi,body.aud-tarifarios .stat{
+  min-height:124px!important;
+  border:1px solid #d9e4d3!important;
+  border-radius:20px!important;
+  background:#ffffff!important;
+  box-shadow:0 10px 24px rgba(16,24,16,.06)!important;
+  transition:border-color .16s ease, box-shadow .16s ease!important;
+  transform:none!important;
+  animation:none!important;
+}
+body.aud-tarifarios .kpi:hover,body.aud-tarifarios .stat:hover{
+  transform:none!important;
+  background:#ffffff!important;
+  border-color:#bfd3b7!important;
+  box-shadow:0 12px 26px rgba(16,24,16,.08)!important;
+}
+body.aud-tarifarios .kpi:after,body.aud-tarifarios .stat:after{display:none!important}
+body.aud-tarifarios .kpi-label,body.aud-tarifarios .stat span{font-size:11px!important;font-weight:800!important;letter-spacing:.08em!important;color:#71806e!important}
+body.aud-tarifarios .kpi-value,body.aud-tarifarios .stat strong{font-size:22px!important;font-weight:800!important;line-height:1.12!important;color:#111911!important;font-family:Manrope,Arial,sans-serif!important}
+body.aud-tarifarios .kpi-hint{font-size:11px!important;color:#7d8a79!important}
+body.aud-tarifarios .card,body.aud-tarifarios .compare-panel,body.aud-tarifarios .hero-card,body.aud-tarifarios .insight-card{animation:none!important}
+body.aud-tarifarios .card:hover,body.aud-tarifarios .compare-panel:hover{border-color:#d9e4d3!important;box-shadow:0 12px 28px rgba(16,24,16,.08)!important}
+body.aud-tarifarios .ghost,body.aud-tarifarios .soft,body.aud-tarifarios .icon-btn{transition:border-color .16s ease, background .16s ease, color .16s ease!important}
+body.aud-tarifarios .ghost:hover,body.aud-tarifarios .soft:hover,body.aud-tarifarios .icon-btn:hover{background:#f8fbf5!important;border-color:#bfd3b7!important;color:#153019!important;transform:none!important}
+body.aud-tarifarios .bar:hover{filter:none!important}
+body.aud-tarifarios .compare-panel,body.aud-tarifarios .card{background:#fff!important}
+body.aud-tarifarios .pill,body.aud-tarifarios .tag{background:#eef7e8!important;border-color:#d7e7cf!important;color:#35532d!important}
+body.aud-tarifarios .fill{background:linear-gradient(90deg,#111911 0%,#7fae1d 100%)!important;box-shadow:none!important}
+body.aud-tarifarios .track{background:#edf3e8!important;border-color:#dce7d6!important}
+body.aud-tarifarios .fade,.kpis .kpi,.stats .stat,.grid2 .card,.gridEq .card{animation:none!important}
+
+/* Distribución: cuadros y globos alineados */
+body.aud-distribucion .layout>.main>.grid2,
+body.aud-distribucion .layout>.main>.grid3,
+body.aud-distribucion .grid2,
+body.aud-distribucion .grid3{align-items:stretch!important}
+body.aud-distribucion .card{border-radius:20px!important;box-shadow:0 10px 24px rgba(16,24,16,.06)!important}
+body.aud-distribucion .grid2>.card{height:100%!important;display:flex!important;flex-direction:column!important}
+body.aud-distribucion .grid2>.card>.actions,
+body.aud-distribucion .grid2>.card .actions{margin-top:auto!important;align-items:center!important}
+body.aud-distribucion #monthSummary.grid2{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important}
+body.aud-distribucion #monthSummary .kpi,
+body.aud-distribucion .kpi{min-height:118px!important;height:100%!important;border-radius:18px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;border:1px solid #d9e4d3!important;box-shadow:none!important}
+body.aud-distribucion .kpi strong{font-size:22px!important;line-height:1.1!important;font-family:Manrope,Arial,sans-serif!important}
+body.aud-distribucion .kpi small,body.aud-distribucion .kpi span{font-size:11px!important}
+body.aud-distribucion .btn,body.aud-distribucion .filebox,body.aud-distribucion .status{min-height:44px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important}
+body.aud-distribucion .filebox{width:100%;padding:16px 18px!important;border-radius:18px!important}
+body.aud-distribucion .status{padding:0 14px!important;white-space:nowrap!important}
+body.aud-distribucion details.panel summary{min-height:56px!important;align-items:center!important}
+body.aud-distribucion .teamgrid{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))!important;align-items:stretch!important}
+body.aud-distribucion .person,.mitem{height:100%!important}
+body.aud-distribucion .empty{min-height:92px!important;display:grid!important;place-items:center!important}
+
+@media(max-width:900px){
+  body.aud-distribucion #monthSummary.grid2{grid-template-columns:1fr!important}
+}
+
+
+/* ===== V13 · Hub Auditoría branding y mejoras solicitadas ===== */
+:root{--hub-lime:#cdff00;--hub-green:#6edb40;--hub-black:#050607;--hub-forest:#153019;--hub-cream:#f0ffe3;--hub-line:#d6e5ce}
+.aud-menu{background:linear-gradient(180deg,#cbff00 0%,#c8ff00 58%,#d7ff57 100%);box-shadow:1px 0 0 #89c91e;padding:0 10px 14px}
+.aud-brand{gap:12px;padding:18px 4px 18px;border-bottom:1px solid rgba(17,25,17,.14);margin-bottom:16px}
+.aud-logo{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:#0b150d;color:var(--hub-lime);border:1px solid rgba(205,255,0,.42);box-shadow:0 10px 28px rgba(0,0,0,.16)}
+.aud-logo svg{width:40px;height:40px;display:block;overflow:visible}
+.aud-brand small{font-size:9px;letter-spacing:.16em;color:#40542c}
+.aud-brand strong{display:block;font-size:17px;letter-spacing:-.04em;line-height:1.05;color:#0f170f}
+.aud-brand span{font-size:10px;color:#48623a}
+.aud-global,.aud-group-btn{font-size:13px;font-weight:800;padding:15px 13px;border-radius:14px}
+.aud-sub>a{font-size:12px;padding:11px 11px;border-radius:11px}
+.aud-group.open>.aud-group-btn{background:#0e150f;color:var(--hub-lime)}
+.aud-global:hover,.aud-group-btn:hover{background:#defe86}
+.aud-sub>a:hover,.aud-sub>a.selected{background:#efffd0;color:#0e150f}
+.aud-footer{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:18px 10px 12px;border-top:1px solid rgba(17,25,17,.13)}
+.aud-author{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;width:100%}
+.aud-photo-picker{position:relative;flex:0 0 auto;cursor:pointer}
+.aud-avatar{display:grid;place-items:center;width:58px;height:58px;border-radius:50%;background:#0d150d;color:var(--hub-lime);border:2px solid #0d150d;background-size:cover;background-position:center;font-size:24px;box-shadow:0 10px 22px rgba(0,0,0,.12)}
+.aud-edit-avatar{position:absolute;right:1px;bottom:1px;display:grid;place-items:center;width:20px;height:20px;background:#0b150d;color:var(--hub-lime);border-radius:50%;font-size:12px;border:1px solid rgba(205,255,0,.28)}
+.aud-username{font-size:13px!important;font-weight:800!important;line-height:1.25;color:#101710;opacity:1!important;display:block}
+.aud-author-text{min-width:0;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px}
+.aud-author-text small{font-size:8px;line-height:1.35;letter-spacing:.11em;font-weight:800;color:#38492b}
+.aud-author-text strong{font-size:12px;line-height:1.25;letter-spacing:-.02em;color:#101710}
+.aud-photo-btn{border:0!important;background:transparent!important;text-decoration:underline;text-align:center!important;font:700 10px Manrope,sans-serif!important;padding:0!important;margin:1px 0 0!important;cursor:pointer;color:#27401b}
+.aud-footer button#aud-logout{width:100%;max-width:182px;border:1px solid #24371d;border-radius:11px;padding:10px;background:#f9ffed;font:800 11px Manrope,sans-serif;cursor:pointer}
+.aud-footer button#aud-logout:hover{background:#111911;color:var(--hub-lime);border-color:#111911}
+
+/* Tipografía equivalente entre módulos */
+body.aud-tarifarios .topbar h2,body.aud-distribucion .topbar h1,body.aud-expedientes .title-wrap h1{font-size:30px!important;letter-spacing:-.05em!important;font-weight:800!important;font-family:Manrope,Arial,sans-serif!important}
+body.aud-tarifarios .topbar p,body.aud-distribucion .topbar p,body.aud-expedientes .title-wrap p{font-size:13px!important;line-height:1.7!important}
+
+/* Gestión de tarifarios con estilo alineado a Expedientes */
+body.aud-tarifarios .kpis,body.aud-tarifarios .stats{gap:12px!important}
+body.aud-tarifarios .kpi,body.aud-tarifarios .stat{position:relative;overflow:hidden;min-height:118px!important;border:1px solid #d7e9cf!important;border-radius:18px!important;background:linear-gradient(180deg,#ffffff 0%,#f8fdf4 100%)!important;box-shadow:0 12px 28px rgba(21,48,25,.07)!important;padding:16px 16px 14px!important;transform:none!important;animation:none!important}
+body.aud-tarifarios .kpi:after,body.aud-tarifarios .stat:after{content:"";position:absolute;left:0;top:0;width:100%;height:4px;background:linear-gradient(90deg,#cdff00,#7cc13c,rgba(205,255,0,.15));opacity:1}
+body.aud-tarifarios .stats .stat:nth-child(-n+2),body.aud-tarifarios .kpis .kpi:nth-child(-n+2){background:linear-gradient(145deg,#050607,#153019)!important;border-color:#153019!important;color:#f2ffea!important;box-shadow:0 16px 34px rgba(5,6,7,.18)!important}
+body.aud-tarifarios .stats .stat:nth-child(-n+2):after,body.aud-tarifarios .kpis .kpi:nth-child(-n+2):after{background:linear-gradient(90deg,#cdff00,#8cff4f,rgba(255,255,255,.25))!important}
+body.aud-tarifarios .kpi-label,body.aud-tarifarios .stat span{font-size:10px!important;text-transform:uppercase!important;letter-spacing:.08em!important;color:#657264!important;font-weight:850!important;line-height:1.35!important}
+body.aud-tarifarios .kpi-value,body.aud-tarifarios .stat strong{font-size:25px!important;font-weight:800!important;line-height:1.08!important;color:#050607!important;letter-spacing:-.04em!important;font-family:Manrope,Arial,sans-serif!important;margin-top:13px!important;display:block!important}
+body.aud-tarifarios .kpi-hint{font-size:10px!important;color:#657264!important;margin-top:8px!important}
+body.aud-tarifarios .stats .stat:nth-child(-n+2) span,body.aud-tarifarios .stats .stat:nth-child(-n+2) strong,body.aud-tarifarios .kpis .kpi:nth-child(-n+2) .kpi-label,body.aud-tarifarios .kpis .kpi:nth-child(-n+2) .kpi-value,body.aud-tarifarios .kpis .kpi:nth-child(-n+2) .kpi-hint{color:#e9f9e1!important}
+body.aud-tarifarios .compare-panel,body.aud-tarifarios .card{border:1px solid #d7e9cf!important;border-radius:18px!important;background:#fff!important;box-shadow:0 12px 28px rgba(21,48,25,.06)!important}
+body.aud-tarifarios .compare-panel{background:linear-gradient(180deg,#fff 0%,#f7fbf4 100%)!important}
+body.aud-tarifarios .select-shell select,body.aud-tarifarios .search{min-height:54px!important;border-radius:16px!important;border:1px solid #d7e3cf!important;background:#fff!important;font-weight:700!important}
+body.aud-tarifarios .select-field label{font-size:10px!important;letter-spacing:.12em!important;color:#556350!important}
+
+/* Distribución: tamaños y tarjetas consistentes */
+body.aud-distribucion .kpi strong,body.aud-distribucion #monthSummary .kpi strong{font-size:25px!important;font-weight:800!important;letter-spacing:-.04em!important}
+body.aud-distribucion .kpi small,body.aud-distribucion .kpi span{font-size:10.5px!important;letter-spacing:.04em!important}
+
+@media(max-width:760px){
+  :root{--aud-side:192px}
+  .aud-brand strong{font-size:15px}
+  .aud-global,.aud-group-btn{font-size:12px}
+  .aud-sub>a{font-size:11px}
+}
+
+/* V14 targeted fixes, preserve original modules */
+html{background:#f0ffe3!important}body.aud-home,body.aud-distribucion,body.aud-tarifarios{background:#f0ffe3!important}
+body.aud-expedientes{background:#0a110b!important}
+body.aud-tarifarios .top-actions{display:flex!important;gap:9px!important;align-items:center!important}
+body.aud-tarifarios .hub-action{min-height:40px!important;padding:0 16px!important;border-radius:999px!important;font-family:Manrope,Arial,sans-serif!important;font-size:10px!important;font-weight:800!important;letter-spacing:.01em!important;text-transform:uppercase!important;box-shadow:none!important;cursor:pointer!important;transition:background-color .15s ease,border-color .15s ease!important}
+body.aud-tarifarios .hub-action.secondary{color:#cdff00!important;background:#102015!important;border:1px solid #53691d!important}
+body.aud-tarifarios .hub-action.primary{color:#111911!important;background:linear-gradient(95deg,#cdff00,#83e849)!important;border:1px solid #b0ed24!important}
+body.aud-tarifarios .hub-action:hover{filter:brightness(1.04)!important;transform:none!important}
+body.aud-tarifarios .fade{animation:none!important;opacity:1!important}
+.aud-author-text small{font-size:8px!important;color:#4b5b39!important;font-weight:700!important;letter-spacing:.04em!important}
+.aud-author-text strong{font-size:10px!important;font-weight:700!important;letter-spacing:0!important}
+.aud-author{gap:5px!important}.aud-footer{gap:7px!important}.aud-photo-btn{font-size:9px!important}
+
+
+/* V16: no transition veil or page opacity: keep modules visible during navigation */
+html,body{background:#f0ffe3!important}
+body.aud-expedientes.aud-booting{background:#f0ffe3!important}
+body.aud-expedientes.aud-booting .main{visibility:hidden!important}
+
+
+/* V17 refinements */
+.aud-username{font-size:17px!important;line-height:1.18!important}
+.aud-author-text{gap:4px!important}
+.aud-author-text small{font-size:9px!important;line-height:1.2!important;letter-spacing:.01em!important;text-transform:none!important;color:#23351b!important;white-space:nowrap!important}
+.aud-author-text strong{display:none!important}
+body.aud-expedientes.aud-booting .main{visibility:visible!important;opacity:1!important}
+body.aud-expedientes.aud-booting{background:#f0ffe3!important}
+
+.aud-photo-picker{cursor:pointer}.aud-photo-picker:hover .aud-edit-avatar{transform:scale(1.06)}
+
+/* V20: preserve the outgoing rendered page during full-document navigation
+   in Chromium 126+, removing the inter-page blank frame. */
+@view-transition { navigation: auto; }
+::view-transition-old(root),::view-transition-new(root) {
+  animation-duration: 0.001s;
+  animation-timing-function: linear;
+  mix-blend-mode: normal;
+}
+/* Old page remains on screen while next one loads; avoid deliberate blanking. */
+html{background:#0a130b!important;}
+body.aud-home .hero-main{animation:none!important;}
+body.aud-tarifarios .fade{animation:none!important;}
