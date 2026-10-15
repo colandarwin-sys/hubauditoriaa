@@ -1,4 +1,4 @@
-let profiles=[];
+let profiles=[];let pendingProfilePhoto=null;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const grid=document.getElementById('profilesGrid');
 const modal=document.getElementById('profileModal');
@@ -11,7 +11,7 @@ async function loadProfilesPage(){
     const j=await api('/api/profiles');
     profiles=j.profiles||[];
     grid.innerHTML=profiles.map(p=>`<div class="profile-row ${p.active?'':'inactive'}">
-      <div><b>${esc(p.display_name)}</b><small>${esc(p.strength||'Sin observación')}</small></div>
+      <div><span class="hub-profile-inline" style="${p.photo_data?'background-image:url('+p.photo_data+')':''}">${p.photo_data?'':'👤'}</span><b>${esc(p.display_name)}</b><small>${esc(p.strength||'Sin observación')}</small></div>
       <span class="status ${p.kind==='Revisar'?'warn':''}">${esc(p.kind)}</span>
       <span>${esc(p.mode)}</span>
       <span>${p.fact?'Facturación':''}${p.fact&&p.concurrence?' · ':''}${p.concurrence?'Concurrencia':''}</span>
@@ -39,6 +39,7 @@ async function loadProfilesPage(){
 
 function openProfile(id=0){
   const p=profiles.find(x=>x.id===id)||{id:'',display_name:'',kind:'Revisar',mode:'Presencial',strength:'',fact:false,concurrence:true,active:true};
+  pendingProfilePhoto=p.photo_data||'';renderProfilePhoto();
   form.elements.id.value=p.id||'';
   form.elements.display_name.value=p.display_name||'';
   form.elements.kind.value=p.kind||'Revisar';
@@ -65,7 +66,8 @@ form.addEventListener('submit',async e=>{
     strength:f.elements.strength.value.trim(),
     fact:f.elements.fact.checked,
     concurrence:f.elements.concurrence.checked,
-    active:true
+    active:true,
+    photo_data:pendingProfilePhoto||''
   };
   if(!payload.display_name){toast('El nombre es obligatorio',true);return;}
   const submit=f.querySelector('button[type="submit"],button.btn.primary');
@@ -78,3 +80,11 @@ form.addEventListener('submit',async e=>{
   }catch(err){toast(err.message,true)}finally{if(submit){submit.disabled=false;submit.textContent='Guardar perfil'}}
 });
 loadProfilesPage();
+
+function renderProfilePhoto(){const el=document.getElementById('profileImageCircle');if(!el)return;el.style.backgroundImage=pendingProfilePhoto?'url('+JSON.stringify(pendingProfilePhoto)+')':'';el.textContent=pendingProfilePhoto?'':'👤'}
+document.getElementById('removeProfilePhoto').onclick=()=>{pendingProfilePhoto='';renderProfilePhoto()};
+document.getElementById('profilePhotoInput').onchange=async e=>{
+ const file=e.target.files?.[0];e.target.value='';if(!file)return;
+ if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>8*1024*1024){toast('Selecciona una imagen válida menor de 8 MB',true);return}
+ try{pendingProfilePhoto=await new Promise((resolve,reject)=>{const rd=new FileReader();rd.onerror=()=>reject(Error('No se pudo leer'));rd.onload=()=>{const img=new Image();img.onerror=()=>reject(Error('Imagen inválida'));img.onload=()=>{const can=document.createElement('canvas');can.width=240;can.height=240;const ctx=can.getContext('2d');const n=Math.min(img.width,img.height);ctx.drawImage(img,(img.width-n)/2,(img.height-n)/2,n,n,0,0,240,240);resolve(can.toDataURL('image/jpeg',.76))};img.src=rd.result};rd.readAsDataURL(file)});renderProfilePhoto()}catch(err){toast(err.message,true)}
+};

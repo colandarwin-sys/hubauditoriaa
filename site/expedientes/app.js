@@ -5,11 +5,11 @@
   const USERS={dcolan:{role:'admin',canManageCuts:true},avillanueva:{role:'viewer',canManageCuts:false},ctejada:{role:'viewer',canManageCuts:false}};
   const SESSION_KEY='expedientes_usuario_activo_v1';
   let activeUser=null;
-  const userCanManageCuts=()=>!!(activeUser&&USERS[activeUser]?.canManageCuts);
-  const getLocalSnapshots = () => { try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]')}catch(e){return []} };
-  const setLocalSnapshots = (rows) => localStorage.setItem(LS_KEY, JSON.stringify(rows));
+  const userCanManageCuts=()=>window.HUB_ACTIVE_ROLE==='administrador';
+  const getLocalSnapshots = () => window.hubPendingSnapshots||[];
+  const setLocalSnapshots = (rows) => {window.hubPendingSnapshots=rows};
   const isSeedDate = (date) => seed.some(s => s.date===date);
-  const isLocalDate = (date) => getLocalSnapshots().some(s => s.date===date);
+  const isLocalDate = (date) => state.snapshots.some(s=>s.date===date);
   function rebuildSnapshots(){
     const local=getLocalSnapshots();
     const seedByDate=new Map(seed.map(s=>[s.date,s]));
@@ -415,7 +415,9 @@
     const label = currentSnapshot(date)?.label || fmtDate(date);
     if(!window.confirm(`¿Eliminar el corte ${label} del histórico local? Esta acción no se puede deshacer.`)) return;
     const remaining = getLocalSnapshots().filter(s=>s.date!==date);
-    setLocalSnapshots(remaining);
+    fetch('/api/expedientes/snapshots/'+encodeURIComponent(date),{method:'DELETE',credentials:'same-origin'}).then(async r=>{if(!r.ok)throw Error((await r.json()).error||'Error de eliminación');setLocalSnapshots(remaining);const ix=seed.findIndex(x=>x.date===date);if(ix>=0)seed.splice(ix,1);rebuildSnapshots();if(state.date===date)state.date=state.snapshots.at(-1)?.date||null;render();toast('Corte eliminado del histórico compartido.')}).catch(e=>toast(e.message));
+    // La eliminación solo se aplica tras confirmar Supabase.
+    return;
     rebuildSnapshots();
     if(state.date===date){
       state.date=state.snapshots.at(-1)?.date||null;
@@ -566,9 +568,9 @@
   function handleFile(file){
     if(!file)return; const reader=new FileReader(); reader.onload=e=>{try{state.pendingUpload=parseWorkbook(file,e.target.result);previewUpload(state.pendingUpload);}catch(err){toast(err.message);}};reader.readAsArrayBuffer(file);
   }
-  function savePending(){
+  async function savePending(){
     if(!userCanManageCuts()){ toast('Tu usuario no tiene permiso para cargar cortes.'); return; }
-    if(!state.pendingUpload)return; let local=getLocalSnapshots(); local=local.filter(x=>x.date!==state.pendingUpload.date); local.push({...state.pendingUpload,warnings:undefined}); setLocalSnapshots(local); rebuildSnapshots(); state.date=state.pendingUpload.date;state.compare=state.snapshots.filter(s=>s.date<state.date).at(-1)?.date||'';state.pendingUpload=null;closeModal();state.view='resumen';syncNav();render();toast('Corte procesado y guardado en el histórico local.');
+    if(!state.pendingUpload)return; const snap={...state.pendingUpload,warnings:undefined};const save=await fetch('/api/expedientes/snapshots',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({snapshot:snap})}).then(async r=>{const j=await r.json();if(!r.ok||!j.ok)throw Error(j.error||'No se pudo guardar en Supabase');return j}).catch(e=>{toast('No se guardó el corte: '+e.message);return null});if(!save)return;let local=getLocalSnapshots();local=local.filter(x=>x.date!==snap.date);local.push(snap);setLocalSnapshots(local);rebuildSnapshots(); state.date=state.pendingUpload.date;state.compare=state.snapshots.filter(s=>s.date<state.date).at(-1)?.date||'';state.pendingUpload=null;closeModal();state.view='resumen';syncNav();render();toast('Corte guardado en Supabase correctamente.');
   }
   function openModal(){ if(!userCanManageCuts()){toast('Tu usuario no tiene permiso para cargar cortes.');return;} $('#uploadModal').classList.remove('hidden'); $('#uploadPreview').classList.add('hidden'); $('#processUpload').disabled=true; $('#fileInput').value='';state.pendingUpload=null; }
   function closeModal(){ $('#uploadModal').classList.add('hidden'); }
@@ -580,7 +582,7 @@
   }
   function login(username){
     const u=String(username||'').trim().toLowerCase();
-    if(!USERS[u]) return false;
+    if(!window.HUB_ACTIVE_USERNAME||u!==window.HUB_ACTIVE_USERNAME)return false;
     activeUser=u;
     sessionStorage.setItem(SESSION_KEY,u);
     $('#authGate').classList.add('hidden');
@@ -597,7 +599,7 @@
   }
   function initAuth(){
     const remembered=sessionStorage.getItem(SESSION_KEY);
-    if(remembered&&USERS[remembered]){ activeUser=remembered; $('#authGate').classList.add('hidden'); }
+    if(remembered&&remembered===window.HUB_ACTIVE_USERNAME){ activeUser=remembered; $('#authGate').classList.add('hidden'); }
     else { $('#authGate').classList.remove('hidden'); }
     $('#currentUserLabel').textContent=activeUser||'—';
     $('#loginForm').addEventListener('submit',e=>{e.preventDefault(); if(!login($('#loginUser').value)) $('#loginError').classList.remove('hidden');});

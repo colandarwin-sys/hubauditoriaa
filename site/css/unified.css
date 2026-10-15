@@ -332,3 +332,20 @@ body.aud-expedientes.aud-booting{background:#f0ffe3!important}
 html{background:#0a130b!important;}
 body.aud-home .hero-main{animation:none!important;}
 body.aud-tarifarios .fade{animation:none!important;}
+
+/* V37: Editor de foto sin alterar las vistas V32 */
+.aud-photo-picker{position:relative;cursor:pointer}.aud-avatar{background-position:center!important;background-size:cover!important;background-repeat:no-repeat!important}.aud-edit-avatar{background:#cdff00!important;color:#0b160c!important;border-radius:50%;box-shadow:0 2px 9px rgba(0,0,0,.3)}
+.hub-photo-backdrop{position:fixed;inset:0;background:rgba(4,12,7,.77);z-index:99999;display:grid;place-items:center;padding:16px;backdrop-filter:blur(6px)}
+.hub-photo-dialog{background:#fff;color:#15231b;border-radius:22px;box-shadow:0 20px 65px #0006;padding:24px;width:min(420px,100%);font-family:inherit}
+.hub-photo-dialog h2{font-size:21px;margin:0 0 8px}.hub-photo-dialog p{color:#576658;font-size:13px;margin:0 0 15px}
+.hub-photo-preview{display:flex;justify-content:center;margin:14px auto 18px}.hub-photo-preview img{height:175px;width:175px;object-fit:cover;border:6px solid #cdff00;border-radius:50%;background:#e2f4cf}
+.hub-photo-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}.hub-photo-actions button{border:0;border-radius:50px;padding:12px 16px;cursor:pointer;background:#e7ede3;color:#10200e;font-weight:800}.hub-photo-actions .hub-save{background:#cdff00}.hub-photo-message{min-height:20px;margin-bottom:8px;color:#266010;font-size:12px}
+
+.hub-profile-photo-control{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:14px;background:#f5ffe9;border-radius:18px;border:1px solid #d6ecc0}
+.hub-profile-photo-circle,.hub-profile-inline{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;background:#d9edc4 center/cover no-repeat;border:3px solid #cdff00;border-radius:50%;color:#254522;font-size:28px;overflow:hidden}
+.hub-profile-photo-circle{width:100px;height:100px}.hub-profile-inline{width:44px;height:44px;font-size:20px;margin-right:12px;vertical-align:middle}
+.hub-profile-photo-pick{display:inline-block;cursor:pointer;border-radius:100px;background:#cdff00;color:#152314;padding:10px 15px;font-size:13px;font-weight:800}
+.hub-photo-remove{display:block;margin-top:8px;background:none;border:0;color:#4e6650;text-decoration:underline;cursor:pointer;font-size:12px}
+
+.hub-user-photo-editor{display:flex;align-items:center;gap:18px;padding:16px 20px;background:#f4ffe9;border:1px solid #d3ecc4;border-radius:18px;margin:12px 0 18px;flex-wrap:wrap}
+.hub-user-list-avatar{width:38px;height:38px;border-radius:50%;border:2px solid #cdff00;background:#e7f6d5 center/cover no-repeat;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;margin-right:10px}

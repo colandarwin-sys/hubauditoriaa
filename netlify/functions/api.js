@@ -22,7 +22,7 @@ const getBody=e=>{try{return JSON.parse(e.body||'{}')}catch{return {}}};
 const normal=s=>String(s||'').trim().toLowerCase();
 const addr=username=>`${normal(username).replace(/[^a-z0-9._-]/g,'')}@hub-auditoria.example`;
 const baseAccess=(role)=>({home:true,users:role==='administrador',modules:{expedientes:{enabled:true,views:{resumen:true,evolucion:true,antiguedad:true,auditor:true,expedientes:true,historico:true}},tarifarios:{enabled:true,views:Object.fromEntries(['Directorio','Comparador cruzado','Matriz catálogo','Tarifas','Histórico','Actualizar tarifario'].map(x=>[x,true]))},distribucion:{enabled:true,views:Object.fromEntries(['Operación mensual','Resultados','Seguimiento operativo','Dashboard','Históricos','Perfiles del equipo','Configuración'].map(x=>[x,true]))}}});
-function publicUser(u){if(!u)return null;return {id:u.id,username:u.username,display_name:u.display_name,role:u.role,active:u.active,access:u.role==='administrador'?baseAccess('administrador'):{...baseAccess(u.role),...(u.access||{})}}}
+function publicUser(u){if(!u)return null;return {id:u.id,username:u.username,display_name:u.display_name,role:u.role,active:u.active,avatar_data:u.avatar_data||null,access:u.role==='administrador'?baseAccess('administrador'):{...baseAccess(u.role),...(u.access||{})}}}
 async function authenticate(e){let c=getCookies(e.headers.cookie||e.headers.Cookie);let jwt=c.hub_access;let extra=[];if(!jwt)return {user:null,headers:extra};
  let check;try{check=await request('/auth/v1/user',{headers:adminHeaders({Authorization:'Bearer '+jwt})})}catch{
    if(c.hub_refresh){try{const r=await request('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:c.hub_refresh})});jwt=r.data.access_token;extra=[cookie('hub_access',jwt,Math.max(300,r.data.expires_in||3600)),cookie('hub_refresh',r.data.refresh_token,60*60*24*30)];check=await request('/auth/v1/user',{headers:adminHeaders({Authorization:'Bearer '+jwt})})}catch{return {user:null,headers:[]}}}
@@ -36,11 +36,26 @@ function summaryOfTariffs(data){
  let payers=[...new Set(['Particular',...data.map(x=>x.payer)])],by={},values={},annual={};for(let p of payers){by[p]=new Map();values[p]=0;annual[p]={}}
  for(let r of data){by[r.payer]?.set(r.profat,r);values[r.payer]+=Number(r.amount)||0;const y=(String(r.vigencia||'').match(/(?:19|20)\d{2}/)||[])[0];if(y){const v=annual[r.payer][y]||={amount:0,count:0,groups:{}};v.amount+=Number(r.amount)||0;v.count++;const g=r.group||'SIN GRUPO';v.groups[g]=(v.groups[g]||0)+(Number(r.amount)||0)}}
  const sets=Object.fromEntries(payers.map(p=>[p,new Set([...by[p]].filter(([_,r])=>!String(r.group||'').toUpperCase().includes('PAQUETE')).map(([k])=>k))]));const pa=sets.Particular,ia=payers.filter(p=>p!=='Particular');let only=0,univ=0,penetration={};for(let i=0;i<=ia.length;i++)penetration[String(i)]=0;for(let code of pa){let n=ia.filter(p=>sets[p].has(code)).length;penetration[String(n)]++;if(!n)only++;if(n===ia.length)univ++}
- let coverage=ia.map(p=>({payer:p,total:by[p].size,common:[...pa].filter(x=>sets[p].has(x)).length,missing:[...pa].filter(x=>!sets[p].has(x)).length,coverage:pa.size?100*[...pa].filter(x=>sets[p].has(x)).length/pa.size:0}));let comparisons={};for(let a of payers)for(let b of payers)if(a!==b){let aa=sets[a],bb=sets[b],common=[...aa].filter(x=>bb.has(x)).length;comparisons[a+'|'+b]={a:aa.size,b:bb.size,common,onlyA:aa.size-common,onlyB:bb.size-common,coverageAB:aa.size?100*common/aa.size:0,coverageBA:bb.size?100*common/bb.size:0,packagesExcluded:a==='Particular'||b==='Particular'}}
- return {payers,particularCount:by.Particular.size,universeCount:new Set(data.map(x=>x.profat)).size,universalCount:univ,onlyParticularCount:only,coverage,values,annual,penetration,comparisons};
+ let coverage=ia.map(p=>({payer:p,total:sets[p].size,common:[...pa].filter(x=>sets[p].has(x)).length,missing:[...pa].filter(x=>!sets[p].has(x)).length,coverage:pa.size?100*[...pa].filter(x=>sets[p].has(x)).length/pa.size:0}));let comparisons={};for(let a of payers)for(let b of payers)if(a!==b){let aa=sets[a],bb=sets[b],common=[...aa].filter(x=>bb.has(x)).length;comparisons[a+'|'+b]={a:aa.size,b:bb.size,common,onlyA:aa.size-common,onlyB:bb.size-common,coverageAB:aa.size?100*common/aa.size:0,coverageBA:bb.size?100*common/bb.size:0,packagesExcluded:a==='Particular'||b==='Particular'}}
+ return {payers,particularCount:by.Particular.size,universeCount:new Set(data.map(x=>x.profat)).size,universalCount:univ,onlyParticularCount:only,coverage,values,annual,penetration,comparisons,packageRule:'Se excluyen paquetes de cruces donde participa Particular.'};
 }
 async function allTariffs(){let out=[],off=0;while(true){const x=await rows('hub_tariff_rows',`select=*&order=id.asc&limit=1000&offset=${off}`);out.push(...x);if(x.length<1000)break;off+=1000;if(off>300000)throw Error('Demasiadas tarifas')};return out.map(x=>({payer:x.payer,profat:x.profat,description:x.description,amount:+x.amount,group:x.group_name,group_num:x.group_num,segus:x.segus,vigencia:x.vigencia}))}
-async function excel(sheets,filename){const ExcelJS=require('exceljs');const wb=new ExcelJS.Workbook();for(const sheet of sheets){const ws=wb.addWorksheet(sheet.name.slice(0,31));ws.addRow(sheet.headers);ws.addRows(sheet.rows);ws.views=[{state:'frozen',ySplit:1}];ws.getRow(1).eachCell(c=>{c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF101D12'}};c.font={bold:true,color:{argb:'FFCDFF00'}};c.alignment={vertical:'middle'}});ws.getRow(1).height=28;ws.autoFilter={from:'A1',to:ws.getRow(1).getCell(sheet.headers.length).address};ws.columns.forEach((c,i)=>{c.width=Math.min(48,Math.max(15,Math.max(sheet.headers[i].length,...sheet.rows.slice(0,100).map(r=>String(r[i]??'').length))+3))});for(let i=2;i<=ws.rowCount;i++){ws.getRow(i).eachCell(c=>{if(i%2===0)c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF0FFDD'}}})}}let bytes=await wb.xlsx.writeBuffer();return {statusCode:200,isBase64Encoded:true,headers:{'Content-Type':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','Content-Disposition':`attachment; filename="${filename}"`,'Cache-Control':'no-store'},body:Buffer.from(bytes).toString('base64')};}
+async function excel(sheets,filename){
+ const ExcelJS=require('exceljs'),wb=new ExcelJS.Workbook();wb.creator='Hub Auditoría';
+ for(let ix=0;ix<sheets.length;ix++){
+  const sheet=sheets[ix],headers=sheet.headers||[],rows=sheet.rows||[];
+  const ws=wb.addWorksheet((sheet.name||'Datos').slice(0,31));
+  if(!headers.length)continue;
+  ws.addTable({name:'HubTabla'+(ix+1),ref:'A1',headerRow:true,totalsRow:false,
+   style:{theme:'TableStyleMedium4',showRowStripes:true},
+   columns:headers.map(h=>({name:String(h)})),rows:rows.length?rows:[[...headers].map(()=>'')]});
+  ws.views=[{state:'frozen',ySplit:1}];ws.getRow(1).height=29;
+  ws.getRow(1).eachCell(c=>{c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF111B12'}};c.font={bold:true,color:{argb:'FFCDFF00'}};c.alignment={vertical:'middle'}});
+  ws.columns.forEach((c,i)=>{c.width=Math.min(56,Math.max(14,...[headers[i],...rows.slice(0,80).map(r=>r[i]??'')].map(x=>String(x).length+3)))});
+  for(let ri=2;ri<=rows.length+1;ri++){ws.getRow(ri).eachCell(c=>{if(ri%2===0)c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF1FFDC'}}})}
+ }
+ const bytes=await wb.xlsx.writeBuffer();return {statusCode:200,isBase64Encoded:true,headers:{'Content-Type':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','Content-Disposition':`attachment; filename="${filename}"`,'Cache-Control':'no-store'},body:Buffer.from(bytes).toString('base64')};
+}
 exports.handler=async e=>{
  const path=(e.path.startsWith('/api/')?e.path:'/api/'+(e.path.split('/.netlify/functions/api/')[1]||'')).replace(/\/+$/,'');const qs=new URLSearchParams(e.rawQuery||e.queryStringParameters&&new URLSearchParams(e.queryStringParameters)||'');const method=e.httpMethod;const body=getBody(e);
  if(path==='/api/health')return reply(200,{ok:true,configured:!!(URL_BASE()&&SERVICE()),version:'Hub Auditoría Cloud'});
@@ -48,7 +63,7 @@ exports.handler=async e=>{
  try{
  if(path==='/api/bootstrap'&&method==='POST'){
    const current=await rows('hub_users','select=id&limit=1');if(current.length)return reply(403,{error:'La instalación inicial ya está completada'});
-   if(!process.env.HUB_BOOTSTRAP_USERNAME||!process.env.HUB_BOOTSTRAP_PASSWORD||body.username!==process.env.HUB_BOOTSTRAP_USERNAME||body.password!==process.env.HUB_BOOTSTRAP_PASSWORD)return reply(403,{error:'Credenciales de instalación incorrectas'});
+   if(!process.env.HUB_BOOTSTRAP_USERNAME||String(process.env.HUB_BOOTSTRAP_PASSWORD||'').length<12||body.username!==process.env.HUB_BOOTSTRAP_USERNAME||body.password!==process.env.HUB_BOOTSTRAP_PASSWORD)return reply(403,{error:'Credenciales de instalación incorrectas'});
    const r=await request('/auth/v1/admin/users',{method:'POST',body:JSON.stringify({email:addr(body.username),password:body.password,email_confirm:true})});const profile=await insert('hub_users',{auth_id:r.data.id,username:normal(body.username),display_name:body.display_name||body.username,role:'administrador',access:baseAccess('administrador')});return reply(200,{ok:true,id:profile.id});
  }
  if(path==='/api/login'&&method==='POST'){
@@ -56,14 +71,27 @@ exports.handler=async e=>{
  }
  if(path==='/api/logout'&&method==='POST')return wrap(200,{ok:true},[cookie('hub_access','',0),cookie('hub_refresh','',0)]);
  const auth=await authenticate(e);if(path==='/api/session')return wrap(200,{ok:!!auth.user,user:auth.user},auth.headers);const user=auth.user;if(!user)return reply(401,{ok:false,error:'No autenticado'});
+ if(path==='/api/avatar'&&method==='POST'){
+   const data=String(body.image||'');
+   if(!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(data)||data.length>180000) return reply(400,{ok:false,error:'Imagen inválida o mayor de 130 KB'});
+   await patch('hub_users',qid(user.id),{avatar_data:data});return reply(200,{ok:true});
+ }
  const admin=user.role==='administrador';const needAdmin=()=>{if(!admin)throw Object.assign(new Error('Permiso denegado'),{status:403})};
+ const matchAvatar=path.match(/^\/api\/users\/(\d+)\/avatar$/);
+ if(matchAvatar&&method==='POST'){
+  if(!admin) return reply(403,{ok:false,error:'Solo administradores'});
+  const image=String(body.image||'');
+  if(image&&!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(image))return reply(400,{error:'Imagen inválida'});
+  if(image.length>180000)return reply(400,{error:'Imagen mayor de 130 KB'});
+  await patch('hub_users',qid(matchAvatar[1]),{avatar_data:image||null});return reply(200,{ok:true});
+ }
  if(path==='/api/users'&&method==='GET'){needAdmin();const x=await rows('hub_users','select=*&order=display_name.asc');return reply(200,{ok:true,users:x.map(publicUser)})}
  if(path==='/api/users'&&method==='POST'){needAdmin();const un=normal(body.username);if(!/^[a-z0-9._-]{3,60}$/.test(un)||String(body.password||'').length<10)return reply(400,{error:'Usuario inválido o contraseña menor de 10 caracteres'});if(!['administrador','gerente','coordinador'].includes(body.role))return reply(400,{error:'Rol inválido'});const r=await request('/auth/v1/admin/users',{method:'POST',body:JSON.stringify({email:addr(un),password:body.password,email_confirm:true})});const u=await insert('hub_users',{auth_id:r.data.id,username:un,display_name:body.display_name||un,role:body.role,access:body.access||baseAccess(body.role)});return reply(200,{ok:true,id:u.id})}
  const uid=path.match(/^\/api\/users\/(\d+)$/);if(uid){needAdmin();const u=(await rows('hub_users',qid(uid[1])))[0];if(!u)return reply(404,{error:'Usuario no encontrado'});if(method==='DELETE'){if(u.role==='administrador'){const admins=await rows('hub_users','role=eq.administrador&active=eq.true&select=id');if(admins.length<=1)return reply(400,{error:'Debe permanecer al menos un administrador'})}await patch('hub_users',qid(uid[1]),{active:false});return reply(200,{ok:true})}if(method==='POST'){const data={username:normal(body.username),display_name:body.display_name||body.username,role:body.role,active:!!body.active,access:body.access||baseAccess(body.role)};if(u.role==='administrador'&&(data.role!=='administrador'||!data.active)){const admins=await rows('hub_users','role=eq.administrador&active=eq.true&select=id');if(admins.length<=1)return reply(400,{error:'Debe permanecer al menos un administrador'})}if(body.password){if(String(body.password).length<10)return reply(400,{error:'La contraseña debe tener al menos 10 caracteres'});await request(`/auth/v1/admin/users/${u.auth_id}`,{method:'PUT',body:JSON.stringify({password:body.password})})}await patch('hub_users',qid(uid[1]),data);return reply(200,{ok:true,id:u.id})}}
- const rr=async kind=>{let a=await rows('hub_records',`kind=eq.${kind}&select=*&order=id.desc&limit=200`);return a.map(obj)};
+ const rr=async kind=>{let a=await rows('hub_records',`kind=eq.${kind}&select=*&order=id.desc&limit=1000`);return a.map(obj)};
  const save=async(kind,payload)=>insert('hub_records',{kind,payload,created_by:user.id});
  if(path==='/api/profiles'&&method==='GET')return reply(200,{ok:true,profiles:(await rr('profile')).map(x=>({...x,active:x.active!==false}))});
- if(path==='/api/profiles'&&method==='POST'){const id=Number(body.id)||0;const payload={display_name:body.display_name||body.name,kind:body.kind||'Revisar',mode:body.mode||'Presencial',strength:body.strength||'',fact:!!body.fact,concurrence:body.concurrence!==false,active:body.active!==false};if(id){await patch('hub_records',`id=eq.${id}&kind=eq.profile`,{payload});return reply(200,{ok:true,id})}const prior=(await rr('profile')).find(x=>normal(x.display_name)===normal(payload.display_name));if(prior){await patch('hub_records',qid(prior.id),{payload});return reply(200,{ok:true,id:prior.id})}const r=await save('profile',payload);return reply(200,{ok:true,id:r.id})}
+ if(path==='/api/profiles'&&method==='POST'){const id=Number(body.id)||0;const photo_data=String(body.photo_data||'');if(photo_data&&(!/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(photo_data)||photo_data.length>180000))return reply(400,{error:'Foto de perfil inválida'});const payload={display_name:body.display_name||body.name,kind:body.kind||'Revisar',mode:body.mode||'Presencial',strength:body.strength||'',fact:!!body.fact,concurrence:body.concurrence!==false,active:body.active!==false,photo_data};if(id){await patch('hub_records',`id=eq.${id}&kind=eq.profile`,{payload});return reply(200,{ok:true,id})}const prior=(await rr('profile')).find(x=>normal(x.display_name)===normal(payload.display_name));if(prior){await patch('hub_records',qid(prior.id),{payload});return reply(200,{ok:true,id:prior.id})}const r=await save('profile',payload);return reply(200,{ok:true,id:r.id})}
  const pid=path.match(/^\/api\/profiles\/(\d+)$/);if(pid&&method==='DELETE'){needAdmin();const old=(await rr('profile')).find(x=>x.id===+pid[1]);if(old)await patch('hub_records',qid(pid[1]),{payload:{...old,active:false}});return reply(200,{ok:true})}
  if(path==='/api/settings'&&method==='GET'){const old=(await rr('settings'))[0];return reply(200,{ok:true,settings:old?.settings||{}})}
  if(path==='/api/settings'&&method==='POST'){const old=(await rr('settings'))[0];if(old)await patch('hub_records',qid(old.id),{payload:{settings:body.settings||{}}});else await save('settings',{settings:body.settings||{}});return reply(200,{ok:true})}
@@ -78,23 +106,76 @@ exports.handler=async e=>{
  const tid=path.match(/^\/api\/tracking\/(\d+)$/);if(tid&&method==='DELETE'){await del('hub_records',`id=eq.${tid[1]}&kind=eq.tracking`);return reply(200,{ok:true})}
  if(path==='/api/dashboard'){const schedules=await rr('schedule'),runs=await rr('run'),users=await rows('hub_users','active=eq.true&select=id');let last=runs[0];const totals={};for(const a of last?.assignments||[]){const k=a.stream+'|'+a.person_name;totals[k]||={stream:a.stream,person_name:a.person_name,hours:0,qty:0};totals[k].hours+=+a.hours||0;totals[k].qty+=+a.qty||0}return reply(200,{ok:true,counts:{schedules:schedules.length,runs:runs.length,users:users.length},recent:runs.slice(0,12),latest_assignments:Object.values(totals)})}
  if(path==='/api/audit'){needAdmin();return reply(200,{ok:true,log:await rr('audit')})}
+
+ if(path==='/api/expedientes/seed.js'&&method==='GET'){
+  const snaps=await rows('hub_exp_snapshots','select=date,payload&order=date.asc&limit=150');
+  return {statusCode:200,headers:{'Content-Type':'application/javascript; charset=utf-8','Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'},body:'window.SEED_SNAPSHOTS='+JSON.stringify(snaps.map(x=>x.payload))+';'};
+ }
+ if(path==='/api/expedientes/snapshots'&&method==='GET'){
+  const snaps=await rows('hub_exp_snapshots','select=date,payload&order=date.asc&limit=150');
+  return reply(200,{ok:true,snapshots:snaps.map(x=>x.payload)});
+ }
+ if(path==='/api/expedientes/snapshots'&&method==='POST'){
+  if(!admin)return reply(403,{error:'Solo administración puede guardar cortes'});
+  const snap=body.snapshot;if(!snap||!/^\d{4}-\d{2}-\d{2}$/.test(snap.date)||!Array.isArray(snap.records)||snap.records.length>35000)return reply(400,{error:'Corte inválido'});
+  await request('/rest/v1/hub_exp_snapshots?on_conflict=date',{method:'POST',headers:adminHeaders({'Prefer':'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify([{date:snap.date,payload:snap,updated_by:user.id}])});
+  return reply(200,{ok:true});
+ }
+ const cut=path.match(/^\/api\/expedientes\/snapshots\/(\d{4}-\d{2}-\d{2})$/);
+ if(cut&&method==='DELETE'){if(!admin)return reply(403,{error:'Solo administradores'});await del('hub_exp_snapshots',`date=eq.${eq(cut[1])}`);return reply(200,{ok:true})}
+ if(path==='/api/migracion/perfiles'&&method==='POST'){
+  needAdmin();const profiles=body.profiles;
+  if(!Array.isArray(profiles)||profiles.length>200)return reply(400,{error:'Cantidad no válida'});
+  const existing=await rr('profile');let n=0;
+  for(const p of profiles){if(!p.display_name)continue;const duplicate=existing.find(x=>normal(x.display_name)===normal(p.display_name));if(duplicate)await patch('hub_records',qid(duplicate.id),{payload:p});else await save('profile',p);n++}
+  if(body.settings&&typeof body.settings==='object'){const row=(await rr('settings'))[0];if(row)await patch('hub_records',qid(row.id),{payload:{settings:body.settings}});else await save('settings',{settings:body.settings})}
+  return reply(200,{ok:true,count:n});
+ }
+ if(path==='/api/migracion/tarifas'&&method==='POST'){
+  needAdmin();const lines=body.rows;if(!Array.isArray(lines)||lines.length<1||lines.length>200)return reply(400,{error:'Lote de tarifas inválido'});
+  const valid=lines.map(r=>{const amount=Number(r.amount);if(!String(r.payer||'').trim()||!String(r.profat||'').trim()||!Number.isFinite(amount)||amount<0)throw Object.assign(Error('Datos de tarifa inválidos'),{status:400});return {payer:String(r.payer),profat:String(r.profat),description:String(r.description||''),amount,group_name:String(r.group||''),group_num:String(r.group_num||''),segus:String(r.segus||''),vigencia:String(r.vigencia||'')}});
+  await request('/rest/v1/hub_tariff_rows?on_conflict=payer,profat',{method:'POST',headers:adminHeaders({'Prefer':'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(valid)});return reply(200,{ok:true,count:valid.length});
+ }
+ if(path==='/api/tarifarios/rows'&&method==='GET'&&!user.access?.modules?.tarifarios?.enabled)return reply(403,{error:'Sin acceso a Tarifarios'});
  if(path==='/api/tarifarios/rows'&&method==='GET')return reply(200,await allTariffs());
+ if(path==='/api/tarifarios/summary'&&method==='GET'&&!user.access?.modules?.tarifarios?.enabled)return reply(403,{error:'Sin acceso a Tarifarios'});
  if(path==='/api/tarifarios/summary'&&method==='GET')return reply(200,summaryOfTariffs(await allTariffs()));
  if(path==='/api/tarifarios/import'&&method==='POST'){
-   if(!user.access?.modules?.tarifarios?.views?.['Actualizar tarifario'])return reply(403,{error:'No autorizado para actualizar tarifarios'});
-   const payer=String(body.payer||'').trim(),lines=body.rows||[],mode=body.mode||'update';if(!payer||!['new','update'].includes(mode)||!Array.isArray(lines)||lines.length===0||lines.length>120000)return reply(400,{error:'Importación inválida'});
-   const existing=await rows('hub_tariff_rows',`payer=eq.${eq(payer)}&select=profat&limit=1`);if(mode==='new'&&existing.length)return reply(400,{error:'La IAFA ya existe'});if(mode==='update'&&!existing.length)return reply(400,{error:'La IAFA todavía no existe'});
-   let seen=new Set();const records=lines.map(r=>{const code=String(r.profat||'').trim(),amount=Number(r.amount);if(!code||!String(r.description||'').trim()||!Number.isFinite(amount)||amount<0||seen.has(code))throw Object.assign(new Error('PROFAT inválido o duplicado: '+code),{status:400});seen.add(code);return {payer,profat:code,description:String(r.description).trim(),amount,group_name:String(r.group||''),group_num:String(r.group_num||''),segus:String(r.segus||''),vigencia:String(r.vigencia||'')}});
-   // Sequential chunks; errors stop the replacement before old records are removed.
-   for(let i=0;i<records.length;i+=250){const chunk=records.slice(i,i+250);await request('/rest/v1/hub_tariff_rows?on_conflict=payer,profat',{method:'POST',headers:adminHeaders({'Prefer':'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(chunk)})}
-   // NOTE: rows missing in the new file are deliberately retained until a full atomic import is implemented.
-   await insert('hub_tariff_imports',{payer,mode,file_name:String(body.file||''),record_count:records.length,imported_by:user.id});return reply(200,{ok:true,count:records.length,payer,backup:'Histórico de importación en Supabase'});
+  if(!user.access?.modules?.tarifarios?.enabled||!user.access?.modules?.tarifarios?.views?.['Actualizar tarifario'])return reply(403,{error:'No autorizado para actualizar tarifarios'});
+  const payer=String(body.payer||'').trim(),lines=body.rows,mode=body.mode||'update';
+  if(!payer||!['new','update'].includes(mode)||!Array.isArray(lines)||lines.length<1||lines.length>30000)return reply(400,{error:'Importación inválida'});
+  const seen=new Set();const clean=lines.map(r=>{
+   const code=String(r.profat||'').trim(),description=String(r.description||'').trim(),amount=Number(r.amount);
+   if(!code||!description||!Number.isFinite(amount)||amount<0||amount>=1e9||seen.has(code))throw Object.assign(Error('PROFAT inválido o duplicado: '+code),{status:400});
+   seen.add(code);
+   return {profat:code,description,amount,group_name:String(r.group||''),group_num:String(r.group_num||''),segus:String(r.segus||''),vigencia:String(r.vigencia||'')};
+  });
+  const result=await request('/rest/v1/rpc/hub_replace_tariff',{method:'POST',body:JSON.stringify({p_payer:payer,p_mode:mode,p_file:String(body.file||''),p_rows:clean,p_user:user.id})});
+  return reply(200,result.data);
  }
  if(path.startsWith('/api/export/')&&path.endsWith('.xlsx')){
-   let runs=await rr('run'),rid=Number(qs.get('run_id'))||runs[0]?.id||0,run=runs.find(x=>x.id===rid);if(path.endsWith('historicos.xlsx'))return await excel([{name:'Históricos',headers:['ID','Mes','Año','Fecha'],rows:runs.map(r=>[r.id,r.month||'',r.year||'',r.created_at||''])}],'historicos_auditoria.xlsx');
+   const runs=await rr('run'),rid=Number(qs.get('run_id'))||runs[0]?.id||0,run=runs.find(x=>x.id===rid);
+   if(path.endsWith('historicos.xlsx'))return await excel([{name:'Históricos',headers:['ID','Mes','Año','Fecha','Responsable','Asignaciones'],rows:runs.map(x=>[x.id,x.month||'',x.year||'',x.created_at||'',x.created_by_name||'',(x.assignments||[]).length])}],'historicos_auditoria.xlsx');
    if(!run)return reply(404,{error:'No hay distribución para exportar'});
-   if(path.endsWith('resultados.xlsx'))return await excel([{name:'Distribución',headers:['Flujo','Colaborador','Concepto','Tipo','Cantidad','Horas','Detalle'],rows:(run.assignments||[]).map(a=>[a.stream,a.person_name,a.task_label,a.task_kind,a.qty,a.hours,a.meta])},{name:'Alertas',headers:['Número','Alerta'],rows:(run.alerts||[]).map((a,i)=>[i+1,a])}],'distribucion_auditoria.xlsx');
-   if(path.endsWith('seguimiento.xlsx'))return await excel([{name:'Seguimiento',headers:['Fecha','Colaborador','Flujo','Tipo','Cantidad','Horas','Notas'],rows:(await rr('tracking')).filter(x=>+x.run_id===rid).map(x=>[x.entry_date,x.person_name,x.stream,x.metric_type,x.qty,x.hours,x.notes])}],'seguimiento_auditoria.xlsx');
+   if(path.endsWith('resultados.xlsx')){
+     const sch=(await rr('schedule')).find(x=>x.id===Number(run.schedule_id)),team=sch?.team||[],groups=new Map();
+     for(const a of run.assignments||[]){const key=a.stream+'|'+a.person_name;const g=groups.get(key)||{stream:a.stream,person_name:a.person_name,qty:0,hours:0,fact:0,conc:0};g.qty+=Number(a.qty)||0;g.hours+=Number(a.hours)||0;if(String(a.task_kind||'').toUpperCase().includes('FACTUR'))g.fact+=Number(a.qty)||0;if(String(a.task_kind||'').toUpperCase().includes('CONCURRENCIA'))g.conc+=Number(a.qty)||0;groups.set(key,g)}
+     const summary=[...groups.values()].map(g=>{const p=team.find(x=>normal(x.name)===normal(g.person_name))||{},available=Number(p.hours)||0,days=Number(sch?.settings?.workDays)||20;return [g.stream,g.person_name,p.kind||'',p.mode||'',available,+g.hours.toFixed(2),available?+(100*g.hours/available).toFixed(1):'',available?+((available-g.hours)/days).toFixed(2):'',g.fact,g.conc]});
+     const details=(stream)=>(run.assignments||[]).filter(x=>x.stream===stream).map(a=>[a.person_name,a.task_label,a.task_kind,a.qty,a.hours,a.meta||'']);
+     return await excel([
+       {name:'Resumen',headers:['Flujo','Colaborador','Perfil','Modalidad','Horas disponibles','Horas asignadas','Carga %','Libre por día (h)','Expedientes','Concurrencia'],rows:summary},
+       {name:'Auditoría Médica',headers:['Colaborador','Concepto','Tipo','Cantidad','Horas','Detalle'],rows:details('Médica')},
+       {name:'Enfermería',headers:['Colaborador','Unidad / Concepto','Tipo','Cantidad','Horas','Detalle'],rows:details('Enfermería')},
+       {name:'Alertas',headers:['N°','Alerta'],rows:(run.alerts||[]).map((a,i)=>[i+1,a])}
+     ],'distribucion_auditoria_'+rid+'.xlsx');
+   }
+   if(path.endsWith('seguimiento.xlsx')){
+    const plan=new Map();for(const a of run.assignments||[]){const key=[a.stream,a.person_name,a.task_kind].join('|');const v=plan.get(key)||{stream:a.stream,name:a.person_name,kind:a.task_kind,qty:0,hours:0};v.qty+=Number(a.qty)||0;v.hours+=Number(a.hours)||0;plan.set(key,v)}
+    return await excel([
+      {name:'Seguimiento',headers:['Fecha','Colaborador','Flujo','Tipo','Cantidad real','Horas reales','Notas','Registrado'],rows:(await rr('tracking')).filter(x=>Number(x.run_id)===rid).map(x=>[x.entry_date,x.person_name,x.stream,x.metric_type,x.qty,x.hours,x.notes||'',x.created_at||''])},
+      {name:'Plan',headers:['Flujo','Colaborador','Tipo planificado','Cantidad planificada','Horas planificadas'],rows:[...plan.values()].map(x=>[x.stream,x.name,x.kind,x.qty,x.hours])}
+    ],'seguimiento_auditoria_'+rid+'.xlsx');
+   }
  }
  return reply(404,{ok:false,error:'Ruta no implementada'});
  }catch(err){console.error('Hub API:',err.message);return reply(err.status&&err.status>=400&&err.status<500?err.status:500,{ok:false,error:err.status>=500?'Error del servidor. Revisa Netlify Functions.':err.message})}

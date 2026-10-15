@@ -1,9 +1,9 @@
 
-(async()=>{const u=await audLoadUser();if(!u)return; audSetup();
+(async()=>{const u=await audLoadUser();if(!u)return; window.HUB_ACTIVE_ROLE=u.role;window.HUB_ACTIVE_USERNAME=String(u.username||'').toLowerCase(); audSetup();
 function init(){
   const name=String(u.username||u.login||u.display_name||'ctejada').toLowerCase();
   const input=document.getElementById('loginUser');
-  if(input) input.value=['dcolan','ctejada','avillanueva'].includes(name)?name:'ctejada';
+  if(input)input.value=name;
   const form=document.getElementById('loginForm');
   if(form) form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));
   const aliases={auditor:'auditores'};

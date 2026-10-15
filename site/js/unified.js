@@ -40,50 +40,30 @@ function audHubLogo(){return `<svg viewBox="0 0 72 72" aria-hidden="true" focusa
 function audMarkup(){const active=audActiveSectionKey();const visible=audVisibleMenu();return `<aside id="aud-menu" class="aud-menu"><div class="aud-brand"><div class="aud-logo">${audHubLogo()}</div><div><small>PORTAL INTEGRADO</small><strong>Hub Auditoría</strong><span>Control operativo y analítico</span></div></div><div class="aud-navtitle">NAVEGACIÓN</div><a class="aud-global ${location.pathname==='/inicio.html'?'selected':''}" href="/inicio.html">Vista general</a>${visible.map(group=>`<div class="aud-group ${group.key===active?'open':''}"><button type="button" class="aud-group-btn" data-group="${group.key}"><span>${group.icon} &nbsp; ${group.title}</span><span>⌄</span></button><div class="aud-sub">${group.views.map(([label,id])=>`<a data-module="${group.key}" data-choice="${id}" href="${audUrl(group.key,id)}">${label}</a>`).join('')}</div></div>`).join('')}<a class="aud-global aud-users-link ${(active==='usuarios')?'selected':''}" href="/usuarios.html" style="display:${(audUser?.role==='administrador'||audAccess().users)?'block':'none'}">⚙ &nbsp; Gestión de usuarios</a><div class="aud-footer"><div class="aud-author"><label class="aud-photo-picker" title="Actualizar foto de perfil"><span class="aud-avatar" id="aud-avatar">👤</span><span class="aud-edit-avatar">✎</span><input type="file" accept="image/png,image/jpeg,image/webp" id="aud-photo-file" hidden></label><span id="aud-username" class="aud-username"></span><div class="aud-author-text"><small>Herramienta diseñada por Darwen Colán</small></div></div><button type="button" id="aud-logout">Cerrar sesión</button></div></aside>`}
 async function audSetup(){if(document.getElementById('aud-menu'))return;if(!audUser){const loaded=await audLoadUser();if(!loaded)return;}if(!audEnsureAllowed())return;document.body.insertAdjacentHTML('afterbegin',audMarkup());document.querySelectorAll('.aud-group-btn').forEach(b=>b.addEventListener('click',()=>b.parentElement.classList.toggle('open')));const l=document.getElementById('aud-logout');if(l)l.onclick=async()=>{await fetch('/api/logout',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});location.href='/login.html'};if(audUser){const n=document.getElementById('aud-username');if(n)n.textContent=audUser.display_name||audUser.username||'';}audHighlight();audInitAvatar();audPrimeNavigation();}
 function audInitAvatar(){
-  const inp=document.getElementById('aud-photo-file'),avatar=document.getElementById('aud-avatar');
-  if(!inp||!avatar)return;
-  const key='audit_avatar_'+(audUser?.username||'user');
-  const show=(data)=>{avatar.style.backgroundImage=data?'url('+JSON.stringify(data)+')':'';avatar.textContent=data?'':'👤';};
-  const persist=(data)=>{
-    try{localStorage.setItem(key,data);show(data);}catch(e){alert('No se pudo guardar la foto en este navegador.');}
+ const inp=document.getElementById('aud-photo-file'), avatar=document.getElementById('aud-avatar');
+ if(!inp||!avatar)return;
+ const render=data=>{avatar.style.backgroundImage=data?'url('+JSON.stringify(data)+')':'';avatar.textContent=data?'':'👤'};
+ render(audUser?.avatar_data||'');
+ const resize=file=>new Promise((resolve,reject)=>{
+  const reader=new FileReader();reader.onerror=()=>reject(new Error('No se pudo leer la fotografía'));
+  reader.onload=()=>{const img=new Image();img.onerror=()=>reject(new Error('Imagen no válida'));
+   img.onload=()=>{const side=240,can=document.createElement('canvas');can.width=side;can.height=side;const ctx=can.getContext('2d');const l=Math.min(img.width,img.height);ctx.drawImage(img,(img.width-l)/2,(img.height-l)/2,l,l,0,0,side,side);resolve(can.toDataURL('image/jpeg',.76))};img.src=reader.result;};reader.readAsDataURL(file);
+ });
+ inp.onchange=async()=>{
+  const file=inp.files?.[0];if(!file)return;inp.value='';
+  if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>8*1024*1024){alert('Usa una imagen JPG, PNG o WebP menor de 8 MB.');return;}
+  let data;try{data=await resize(file)}catch(e){alert(e.message);return;}
+  const overlay=document.createElement('div');overlay.className='hub-photo-backdrop';
+  overlay.innerHTML='<div class="hub-photo-dialog" role="dialog" aria-modal="true" aria-label="Editar foto de perfil"><h2>Tu foto de perfil</h2><p>Vista previa circular. Se guardará en tu usuario y podrás verla desde otras computadoras.</p><div class="hub-photo-preview"><img alt="Vista previa de foto"></div><div class="hub-photo-message" aria-live="polite"></div><div class="hub-photo-actions"><button type="button" class="hub-cancel">Cancelar</button><button type="button" class="hub-save">Guardar foto</button></div></div>';
+  document.body.append(overlay);overlay.querySelector('img').src=data;
+  overlay.querySelector('.hub-cancel').onclick=()=>overlay.remove();
+  overlay.querySelector('.hub-save').onclick=async()=>{
+   const btn=overlay.querySelector('.hub-save'),msg=overlay.querySelector('.hub-photo-message');btn.disabled=true;btn.textContent='Guardando...';
+   try{const res=await fetch('/api/avatar',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:data})});const j=await res.json();if(!res.ok||!j.ok)throw Error(j.error||'No fue posible guardar');audUser.avatar_data=data;render(data);msg.textContent='Foto actualizada correctamente ✓';setTimeout(()=>overlay.remove(),900)}catch(e){msg.textContent=e.message;btn.disabled=false;btn.textContent='Reintentar'}
   };
-  const downscaleImage=(file)=>new Promise((resolve,reject)=>{
-    const reader=new FileReader();
-    reader.onerror=()=>reject(new Error('No se pudo leer la imagen.'));
-    reader.onload=()=>{
-      const img=new Image();
-      img.onerror=()=>reject(new Error('La imagen no es válida.'));
-      img.onload=()=>{
-        const maxSide=520;
-        const scale=Math.min(1,maxSide/Math.max(img.width,img.height));
-        const w=Math.max(1,Math.round(img.width*scale));
-        const h=Math.max(1,Math.round(img.height*scale));
-        const canvas=document.createElement('canvas');
-        canvas.width=w; canvas.height=h;
-        const ctx=canvas.getContext('2d');
-        ctx.drawImage(img,0,0,w,h);
-        const mime=file.type==='image/png'?'image/png':'image/jpeg';
-        const quality=mime==='image/png'?undefined:0.84;
-        resolve(canvas.toDataURL(mime,quality));
-      };
-      img.src=reader.result;
-    };
-    reader.readAsDataURL(file);
-  });
-  try{show(localStorage.getItem(key));}catch(e){}
-  inp.addEventListener('change',async()=>{
-    const file=inp.files&&inp.files[0]; if(!file)return;
-    if(!['image/png','image/jpeg','image/webp'].includes(file.type)){alert('Selecciona una imagen JPG, PNG o WebP.'); inp.value=''; return;}
-    if(file.size>8*1024*1024){alert('La imagen supera el límite de 8 MB.'); inp.value=''; return;}
-    try{
-      const data=await downscaleImage(file);
-      persist(data);
-    }catch(e){
-      alert(e.message||'No se pudo procesar la imagen.');
-    }
-    inp.value='';
-  });
+ };
 }
+
 function audHighlight(){const active=audActiveSectionKey();const current=audCurrentViewKey(active);document.querySelectorAll('.aud-group').forEach(g=>{if(g.querySelector(`[data-module="${active}"]`))g.classList.add('open')});document.querySelectorAll('#aud-menu .aud-sub a').forEach(a=>{const ok=a.dataset.module===active&&(a.dataset.choice===current||(active==='expedientes'&&current==='auditor'&&a.dataset.choice==='auditor'));a.classList.toggle('selected',ok)});document.querySelectorAll('#aud-menu .aud-global').forEach(a=>{if(a.getAttribute('href')==='/inicio.html')a.classList.toggle('selected',location.pathname==='/inicio.html');if(a.getAttribute('href')==='/usuarios.html')a.classList.toggle('selected',location.pathname==='/usuarios.html');});}
 
 function audPrefetch(url){
