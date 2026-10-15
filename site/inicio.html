@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang='es'>
+<head><script src="/js/demo_api.js"></script>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Hub Auditoría · Vista general</title>
+<link rel='preconnect' href='https://fonts.googleapis.com'>
+<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+<link href='https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap' rel='stylesheet'>
+<link rel='stylesheet' href='/css/app.css'>
+<link rel='stylesheet' href='/css/unified.css'>
+<style>
+.home-stage{margin-left:var(--aud-side);min-height:100vh;background:#f0ffe3;color:#111811;padding:0 0 54px;box-sizing:border-box}
+.home-topline{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0;padding:16px 34px 0;background:#050607;color:#cdff00}.home-topline b{font-size:11px;letter-spacing:.12em}.home-topline span{font-size:11px;color:#c4d8ba}
+.hero-main{position:relative;overflow:hidden;min-height:470px;background:linear-gradient(110deg,#050607 0%,#09110a 36%,#153019 100%);color:#fff;display:flex;align-items:flex-start}
+.hero-main:before{content:'';position:absolute;right:-80px;top:-70px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(205,255,0,.14),transparent 62%)}
+.hero-main:after{content:'';position:absolute;left:-120px;bottom:-150px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(110,219,64,.14),transparent 62%)}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start;width:100%;position:relative;z-index:2}
+.hero-content{padding:34px clamp(26px,4vw,75px) 128px;max-width:840px;position:relative;z-index:3}
+.brand-mark{display:inline-flex;align-items:center;gap:14px;padding:0;margin:0 0 8px;background:none;border:0}.brand-mark .mark-box{display:grid;place-items:center;width:74px;height:74px;border-radius:22px;background:linear-gradient(160deg,rgba(10,19,12,.92),rgba(14,29,17,.82));border:1px solid rgba(205,255,0,.12);box-shadow:0 14px 34px rgba(0,0,0,.18)}.brand-mark .mark-box svg{width:54px;height:54px;display:block}.brand-copy small{display:block;font-size:10px;letter-spacing:.2em;color:#a2bb9d;text-transform:uppercase;margin-bottom:4px}.brand-copy strong{display:block;font-size:30px;line-height:1;letter-spacing:-.06em;color:#fff}
+.kicker{letter-spacing:.23em;font-weight:800;color:#cdff00;font-size:11px;margin-top:18px}
+.hero-content h1{font-size:clamp(42px,5vw,74px);line-height:1.02;letter-spacing:-.08em;margin:16px 0 18px;font-weight:800}
+.hero-content h1 span{display:block;color:#cdff00}
+.hero-content p{font-size:14px;line-height:1.9;max-width:620px;color:#d6e6d0}
+.hero-side{padding:92px 34px 58px 0;display:grid;gap:14px;align-content:start;position:relative;z-index:3}
+.mini-card{background:linear-gradient(145deg,rgba(11,21,12,.9),rgba(18,42,22,.96));border:1px solid rgba(205,255,0,.14);border-radius:18px;padding:16px 18px}
+.mini-card small{display:block;color:#8ca68a;font-size:10px;text-transform:uppercase;letter-spacing:.08em}.mini-card strong{display:block;font-size:30px;line-height:1;margin:8px 0 6px}.mini-card span{display:block;color:#d7e7d3;font-size:12px;line-height:1.5}.mini-card.accent strong{color:#cdff00}
+.hero-ekg{position:absolute;left:0;right:0;bottom:8px;height:118px;pointer-events:none;z-index:1;opacity:.92}.hero-ekg svg{width:100%;height:100%;display:block}.hero-ekg .base{fill:none;stroke:rgba(205,255,0,.12);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}.hero-ekg .trace{fill:none;stroke:#cdff00;stroke-width:2.15;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:2200;stroke-dashoffset:2200;animation:heroDraw 10s linear infinite;filter:drop-shadow(0 0 6px rgba(205,255,0,.16))}.hero-ekg .trace.phase2{opacity:.58;animation-delay:-5s}.hero-ekg .runner{fill:#cdff00;filter:drop-shadow(0 0 10px rgba(205,255,0,.28));offset-path:path('M0 64 H250 L292 64 L320 60 L342 72 L370 20 L394 102 L418 64 H760 L802 64 L830 60 L852 72 L880 20 L904 102 L928 64 H1275 L1317 64 L1345 60 L1367 72 L1395 20 L1419 102 L1443 64 H1800');offset-distance:0%;animation:heroRunner 10s linear infinite}.hero-ekg .runner.phase2{opacity:.62;animation-delay:-5s}
+.section-wrap{padding:0 32px}.hirow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:34px 0 19px}.hirow h2{margin:0;font-size:21px;letter-spacing:-.045em}.clock-pill{font-size:11px;color:#375335;background:#e5f5df;border:1px solid #cbe6c2;padding:9px 12px;border-radius:100px}
+.mod-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px}.mod-card{position:relative;display:flex;flex-direction:column;gap:15px;min-width:0;background:#fff;border:1px solid #dce9d5;padding:23px;border-radius:18px;text-decoration:none;color:#152018;box-shadow:0 9px 26px #1c3a1910;transition:transform .22s,box-shadow .22s}.mod-card:hover{transform:translateY(-6px);box-shadow:0 25px 40px #1c3a1929}.mod-icon{display:grid;place-items:center;width:47px;height:47px;background:#101b11;border-radius:13px;color:#cdff00;font-size:22px}.mod-card h3{font-size:17px;margin:0;letter-spacing:-.035em}.mod-card p{color:#657260;font-size:12px;line-height:1.8;margin:0;flex:1}.mod-foot{font-size:11px;font-weight:800;color:#327a29;display:flex;justify-content:space-between;align-items:center;padding-top:14px;border-top:1px solid #e7eee4}
+.reveal{animation:none!important}.mod-grid .mod-card:nth-child(2){animation-delay:.12s}.mod-grid .mod-card:nth-child(3){animation-delay:.24s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}@keyframes heroDraw{0%{stroke-dashoffset:2200;opacity:0}10%{opacity:1}45%{stroke-dashoffset:0;opacity:1}50%{opacity:.96}100%{stroke-dashoffset:0;opacity:0}}@keyframes heroRunner{0%{offset-distance:0%;opacity:0}10%{opacity:1}45%{offset-distance:49%;opacity:1}50%{opacity:0}100%{offset-distance:49%;opacity:0}}
+@media(max-width:1150px){.hero-grid{grid-template-columns:1fr}.hero-side{padding:8px 26px 58px 26px;grid-template-columns:1fr}.hero-content{padding-bottom:120px}.hero-ekg{bottom:14px}}@media(max-width:1100px){.mod-grid{grid-template-columns:1fr}.hero-main{min-height:330px}}@media(max-width:760px){.hero-side{grid-template-columns:1fr;padding:4px 18px 52px}.home-topline,.section-wrap{padding-left:18px;padding-right:18px}.hero-content{padding:32px 24px 118px}.hero-ekg{height:104px;bottom:10px}.brand-mark .mark-box{width:64px;height:64px}.brand-copy strong{font-size:26px}}@media(prefers-reduced-motion:reduce){.reveal,.hero-ekg .trace,.hero-ekg .runner{animation:none!important}.mod-card{transition:none}}
+</style>
+</head>
+<body class='aud-home'>
+<div class='home-stage'>
+  <div class='home-topline'><b>HUB AUDITORÍA · GERENCIA DE AUDITORÍA</b><span id='homeGreeting'>Gestión integrada</span></div>
+  <section class='hero-main reveal'>
+    <div class='hero-grid'>
+      <div class='hero-content'>
+        <div class='brand-mark'><div class='mark-box'><svg viewBox='0 0 72 72' aria-hidden='true' focusable='false'>
+  <defs>
+    <linearGradient id='hubRing' x1='0' y1='0' x2='1' y2='1'>
+      <stop offset='0%' stop-color='#cdff00'/>
+      <stop offset='100%' stop-color='#72e43b'/>
+    </linearGradient>
+    <radialGradient id='hubGlow' cx='50%' cy='50%' r='70%'>
+      <stop offset='0%' stop-color='rgba(205,255,0,.28)'/>
+      <stop offset='100%' stop-color='rgba(205,255,0,0)'/>
+    </radialGradient>
+  </defs>
+  <rect x='5' y='5' width='62' height='62' rx='18' fill='#09120c' stroke='rgba(205,255,0,.14)'/>
+  <circle cx='36' cy='36' r='23' fill='url(#hubGlow)' opacity='.65'/>
+  <path d='M47 20.8A18 18 0 1 0 47 51.2' fill='none' stroke='url(#hubRing)' stroke-width='8.5' stroke-linecap='round'/>
+  <circle cx='49.5' cy='36' r='4.8' fill='#cdff00'/>
+</svg></div><div class='brand-copy'><small>Portal integrado</small><strong>Hub Auditoría</strong></div></div>
+        <div class='kicker'>PLATAFORMA INTEGRADA · CONTROL · ANÁLISIS · OPERACIÓN</div>
+        <h1>Un solo centro<br><span>para decidir mejor.</span></h1>
+      </div>
+      <div class='hero-side'>
+        <div class='mini-card'><small>Control de accesos</small><strong id='homeRole'>—</strong><span>Los permisos pueden configurarse por portal, por módulo y por vistas específicas.</span></div>
+      </div>
+    </div>
+    <div class='hero-ekg' aria-hidden='true'>
+      <svg viewBox='0 0 1800 120' preserveAspectRatio='none'>
+        <path class='base' d='M0 64 H250 L292 64 L320 60 L342 72 L370 20 L394 102 L418 64 H760 L802 64 L830 60 L852 72 L880 20 L904 102 L928 64 H1275 L1317 64 L1345 60 L1367 72 L1395 20 L1419 102 L1443 64 H1800'/>
+        <path class='trace' d='M0 64 H250 L292 64 L320 60 L342 72 L370 20 L394 102 L418 64 H760 L802 64 L830 60 L852 72 L880 20 L904 102 L928 64 H1275 L1317 64 L1345 60 L1367 72 L1395 20 L1419 102 L1443 64 H1800'/>
+        <path class='trace phase2' d='M0 64 H250 L292 64 L320 60 L342 72 L370 20 L394 102 L418 64 H760 L802 64 L830 60 L852 72 L880 20 L904 102 L928 64 H1275 L1317 64 L1345 60 L1367 72 L1395 20 L1419 102 L1443 64 H1800'/>
+        <circle class='runner' r='4.8' cx='0' cy='0'></circle>
+        <circle class='runner phase2' r='4.8' cx='0' cy='0'></circle>
+      </svg>
+    </div>
+  </section>
+  <div class='section-wrap'>
+    <div class='hirow'><h2>Explora las herramientas</h2><span class='clock-pill'>● Portal integrado</span></div>
+    <div class='mod-grid' id='moduleCards'>
+      <a class='mod-card reveal' data-module-card='expedientes' href='/expedientes/index.html#resumen'><div class='mod-icon'>▤</div><h3>Expedientes pendientes</h3><p>Indicadores, evolución, antigüedad, auditoría e histórico de cargas.</p><div class='mod-foot'><span>Consultar módulo</span><span>↗</span></div></a>
+      <a class='mod-card reveal' data-module-card='tarifarios' href='/tarifarios/index.html#Directorio'><div class='mod-icon'>↗</div><h3>Gestión de tarifarios</h3><p>Comparadores de IAFA, análisis tarifario, vigencias, matrices e histórico.</p><div class='mod-foot'><span>Analizar tarifas</span><span>↗</span></div></a>
+      <a class='mod-card reveal' data-module-card='distribucion' href='/operacion.html'><div class='mod-icon'>▦</div><h3>Distribución de tareas</h3><p>Operación mensual, seguimiento, resultados, perfiles y reportes.</p><div class='mod-foot'><span>Gestionar operación</span><span>↗</span></div></a>
+    </div>
+  </div>
+</div>
+<script src='/js/unified.js'></script>
+<script>
+(async()=>{
+  const u=await audLoadUser();
+  if(!u)return;
+  window.audUser=u;
+  audSetup();
+  document.getElementById('homeGreeting').textContent='Bienvenido/a, '+(u.display_name||u.username||'');
+  document.getElementById('homeRole').textContent=(u.role||'usuario').replace(/^./,m=>m.toUpperCase());
+  document.querySelectorAll('[data-module-card]').forEach(card=>{if(!audModuleAllowed(card.dataset.moduleCard))card.remove()});
+})();
+</script>
+</body>
+</html>
