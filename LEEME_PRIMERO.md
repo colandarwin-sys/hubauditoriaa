@@ -1,38 +1,36 @@
-# Hub Auditoría V34 — Vista previa para GitHub y Netlify
+# Hub Auditoría — V32 adaptada para GitHub, Netlify y Supabase
 
-## IMPORTANTE
+**Esta entrega contiene las pantallas completas de la V32 (no una maqueta).** La API de Python ha sido sustituida por una primera implementación de funciones Netlify conectadas a Supabase. Para utilizarla hay que **configurar Supabase**: no existen contraseñas predefinidas ni datos incrustados en GitHub.
 
-Esta publicación contiene la interfaz completa de la V32 y un **adaptador local de demostración** para abrir los módulos sin servidor Python. **NO es una aplicación operativa compartida ni ofrece autenticación real**. Está destinada a **probar la interfaz** mientras se desarrolla la conexión Supabase.
+## Instrucciones (en orden)
 
-- Datos clínicos, tarifarios reales y base SQLite: **excluidos deliberadamente**.
-- Entrada: botón **Explorar Hub Auditoría** (las credenciales en pantalla no tienen valor de seguridad).
-- Algunos controles pueden utilizarse de forma local, con almacenamiento por navegador. Cambios en un equipo no aparecen en otros.
-- Importación persistente de tarifarios, exportaciones del servidor, autenticación real y sincronización requieren Supabase y código backend adicional.
-- **No ingreses información clínica ni real**. El sitio de demostración no es seguro para producción.
+1. Conserva tu respaldo de la **V32 local**. No elimines el archivo ZIP original ni su base SQLite.
+2. En el **Supabase existente que tú elijas**, abre SQL Editor y ejecuta `supabase/01_hub_schema.sql`. El script **crea tablas `hub_*` nuevas**, no borra las existentes.
+3. En **Netlify > Site configuration > Environment variables** agrega **SUPABASE_URL** (URL de tu proyecto), **SUPABASE_SERVICE_ROLE_KEY** (clave secreta, solo en Netlify) y credenciales temporales de instalación **HUB_BOOTSTRAP_USERNAME** y **HUB_BOOTSTRAP_PASSWORD**. Usa una contraseña nueva y robusta (no uses la contraseña original). **Nunca subas estas cuatro variables a GitHub.**
+4. Sube **el contenido de este ZIP** (las carpetas `site`, `netlify`, `supabase`, etc.) a la raíz del repositorio existente. Confirma que `netlify.toml` está en la raíz.
+5. Netlify: vincula el repositorio/rama correcta. Directorio de publicación: `site`; funciones: `netlify/functions`. Netlify instalará `exceljs` a partir de `package.json`. Publica y abre `/instalacion.html` una sola vez. Ingresa allí las credenciales exactas que configuraste en las variables de instalación para crear el primer administrador.
+6. Entra a `/login.html` con ese administrador. Crea los demás usuarios desde **Gestión de usuarios**, **asignando contraseñas nuevas**. Por seguridad no se copiaron las contraseñas de SQLite. Cuando termine la instalación, **elimina HUB_BOOTSTRAP_USERNAME y HUB_BOOTSTRAP_PASSWORD de Netlify** y vuelve a desplegar.
+7. Conserva la versión original local para consultar registros previos hasta completar una importación privada. Si el proyecto anterior contenía expedientes o tarifas, **no subas sus archivos de datos a GitHub**.
 
-## Subir a tu GitHub existente
+## Qué funciona cuando Supabase queda conectado
 
-1. Respalda tu repositorio antiguo antes de reemplazar archivos.
-2. Sube los archivos y carpetas de este ZIP a la **raíz** del repositorio, no el ZIP comprimido.
-3. Asegúrate de que `netlify.toml` quede al mismo nivel que `site/`.
-4. En Netlify configura **Publish directory: site**. No uses la antigua carpeta `netlify-site`.
-5. Si el sitio anterior no se actualiza, revisa rama `main` y último Deploy en Netlify; fuerza un deploy si corresponde.
-6. Entra al dominio Netlify; `index.html` redirige a `login.html` (modo demostración).
+- Inicio/cierre de sesión real con Supabase Auth y cookies HttpOnly.
+- Gestión de usuarios y permisos; perfiles de equipo; configuraciones; carga/guardado de horarios, distribuciones, seguimiento y consultas del dashboard.
+- Tarifarios: lectura en backend autenticado, análisis en las pantallas originales, importación por IAFA con validación básica e historial de importaciones. Descargas de Distribución: `.xlsx` con colores negro/verde y filtros.
+- Navegación y estilos originales V32: gráficos, filtros, tablas, ventanas y animaciones.
 
-## Archivos
+## Limitaciones REALES pendientes de migrar antes de producción clínica
 
-- `site/`: interfaz existente y recursos estáticos.
-- `site/js/demo_api.js`: adaptador local de prueba; se reemplazará en la migración a Supabase.
-- `supabase/INTEGRACION_PENDIENTE.md`: próximos pasos.
-- `netlify.toml`: configuración de despliegue.
-- `.env.example`: ejemplo sin secretos.
+1. **Expedientes pendientes** sigue usando el almacenamiento local del navegador; aún no sincroniza cargas ni cortes entre equipos con Supabase. Sus archivos de pacientes originales se excluyeron del sitio público.
+2. Los **tarifarios históricos originales** no están incluidos en la carpeta pública. Para que aparezcan deben importarse **desde una cuenta autenticada** una vez configurado Supabase (o realizar migración privada). Mientras no se importen, el módulo inicia sin registros.
+3. La importación de tarifas en la API nueva usa **upsert por lotes**, no el reemplazo atómico y copia de respaldo que tenía Python: los registros ausentes del nuevo archivo quedan conservados. **No usar para conciliación productiva hasta cerrar esta diferencia funcional**.
+4. Las descargas de Excel del servidor mantienen los datos principales, pero todavía **no todas las pestañas y cálculos auxiliares** de la exportación Python original.
+5. Netlify tiene límites de tamaño/duración para funciones: importaciones grandes requieren pruebas por IAFA y eventualmente una función de importación asíncrona.
+6. La autenticación es real, pero resta una auditoría completa de políticas, flujos de permisos, expiración de sesiones, importación de históricos y cargas multiusuario antes de utilizar datos clínicos reales.
+7. Los historiales antiguos de SQLite no se migran automáticamente. Guardar siempre la V32 original.
 
-## Comprobaciones
+**No se afirma que la web ya sea equivalente al 100% a la V32 local.** Este paquete prepara las conexiones verdaderas, evita simulaciones de acceso y conserva el código visual original.
 
-- Interfaz: vistas de los módulos, gráficos y controles del navegador.
-- Distribución: guardado de demostración en navegador, no compartido.
-- Tarifarios: lectura de Excel para vista previa; guardado en base compartida aún pendiente.
-- Expedientes: datos iniciales vacíos; utiliza solo archivos ficticios para explorar el proceso.
-- Excel de servidor: exportaciones de `/api/export/*` necesitan migración. Las exportaciones del navegador podrán probarse donde no requieran backend.
+## Seguridad
 
-El último proyecto plenamente operativo **local** sigue siendo V32, que debe mantenerse respaldado. Esta versión es una publicación de prueba, no reemplazo funcional de V32 en producción.
+No publiques nunca `auditoria.db`, archivos de expedientes, `seed.js` original con pacientes, `tariffs.json` original, `.env`, hashes de contraseñas ni llaves Supabase. La clave service-role solamente va como variable privada en Netlify. El SQL revoca acceso directo anon/authenticated a tablas Hub: la función valida una sesión Supabase antes de usar la clave privada. Haz un respaldo independiente de las bases antiguas antes de migrar.

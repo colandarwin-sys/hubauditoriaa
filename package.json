@@ -1,10 +1,9 @@
 {
-  "name": "portal-distribucion-auditoria-netlify",
-  "version": "1.0.0",
+  "name": "hub-auditoria-cloud",
   "private": true,
-  "engines": {"node": ">=20"},
+  "version": "1.0.0",
+  "description": "Hub Auditor\u00eda Good Hope Netlify/Supabase",
   "dependencies": {
-    "exceljs": "^4.4.0",
-    "pg": "^8.13.1"
+    "exceljs": "^4.4.0"
   }
 }
